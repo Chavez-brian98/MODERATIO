@@ -1,0 +1,75 @@
+<?php
+
+use App\Http\Controllers\AuditController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CashRegisterController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReturnController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SettingsController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [AuthController::class, 'create'])->name('login');
+Route::get('/login', [AuthController::class, 'create'])->name('login.form');
+Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+
+Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
+Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+Route::get('/pos', [PosController::class, 'index'])->name('pos');
+Route::get('/pos/productos', [PosController::class, 'searchProducts'])->name('pos.products');
+Route::get('/pos/clientes', [PosController::class, 'searchCustomers'])->name('pos.customers');
+Route::post('/pos/caja/abrir', [PosController::class, 'openCashRegister'])->name('pos.cash-register.open');
+Route::post('/pos/venta', [PosController::class, 'completeSale'])->name('pos.sale.complete');
+Route::get('/caja', [CashRegisterController::class, 'index'])->name('cash-register.index');
+Route::get('/caja/abrir', [CashRegisterController::class, 'create'])->name('cash-register.create');
+Route::post('/caja', [CashRegisterController::class, 'store'])->name('cash-register.store');
+Route::get('/caja/{cashRegister}', [CashRegisterController::class, 'show'])->name('cash-register.show');
+Route::patch('/caja/{cashRegister}/cerrar', [CashRegisterController::class, 'close'])->name('cash-register.close');
+Route::get('/inventario', [InventoryController::class, 'index'])->name('inventory.index');
+Route::get('/inventario/crear', [InventoryController::class, 'create'])->name('inventory.create');
+Route::post('/inventario', [InventoryController::class, 'store'])->name('inventory.store');
+Route::get('/inventario/{product}', [InventoryController::class, 'show'])->name('inventory.show');
+Route::get('/inventario/{product}/editar', [InventoryController::class, 'edit'])->name('inventory.edit');
+Route::patch('/inventario/{product}/estado', [InventoryController::class, 'toggleActive'])->name('inventory.toggle');
+Route::match(['put', 'patch'], '/inventario/{product}', [InventoryController::class, 'update'])->name('inventory.update');
+Route::delete('/inventario/{product}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+Route::get('/categorias', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categorias/crear', [CategoryController::class, 'create'])->name('categories.create');
+Route::post('/categorias', [CategoryController::class, 'store'])->name('categories.store');
+Route::get('/categorias/{category}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/categorias/{category}/editar', [CategoryController::class, 'edit'])->name('categories.edit');
+Route::patch('/categorias/{category}/estado', [CategoryController::class, 'toggleActive'])->name('categories.toggle');
+Route::match(['put', 'patch'], '/categorias/{category}', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categorias/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+Route::get('/empleados', [EmployeeController::class, 'index'])->name('employees.index');
+Route::get('/empleados/crear', [EmployeeController::class, 'create'])->name('employees.create');
+Route::post('/empleados', [EmployeeController::class, 'store'])->name('employees.store');
+Route::get('/empleados/{employee}/editar', [EmployeeController::class, 'edit'])->name('employees.edit');
+Route::patch('/empleados/{employee}/estado', [EmployeeController::class, 'toggleActive'])->name('employees.toggle');
+Route::match(['put', 'patch'], '/empleados/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+Route::delete('/empleados/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+Route::get('/empleados/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+Route::get('/roles/crear', [RoleController::class, 'create'])->name('roles.create');
+Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+Route::get('/roles/{role}', [RoleController::class, 'show'])->name('roles.show');
+Route::get('/roles/{role}/editar', [RoleController::class, 'edit'])->name('roles.edit');
+Route::patch('/roles/{role}/estado', [RoleController::class, 'toggleActive'])->name('roles.toggle');
+Route::match(['put', 'patch'], '/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+Route::get('/devoluciones', [ReturnController::class, 'index'])->name('returns.index');
+Route::get('/devoluciones/crear', [ReturnController::class, 'create'])->name('returns.create');
+Route::post('/devoluciones', [ReturnController::class, 'store'])->name('returns.store');
+Route::get('/devoluciones/{return}', [ReturnController::class, 'show'])->name('returns.show');
+Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/bitacora', [AuditController::class, 'index'])->name('audit.index');
+Route::get('/bitacora/{log}', [AuditController::class, 'show'])->name('audit.show');
+Route::get('/configuracion', [SettingsController::class, 'index'])->name('settings.index');
+Route::put('/configuracion', [SettingsController::class, 'update'])->name('settings.update');
