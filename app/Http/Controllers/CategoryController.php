@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -40,7 +41,9 @@ class CategoryController extends Controller
 
         $validated['is_active'] = $request->boolean('is_active');
 
-        Category::create($validated);
+        $category = Category::create($validated);
+
+        AuditService::log('CREATED', 'categories', $category->id, $validated);
 
         return redirect()->route('categories.index');
     }
@@ -75,9 +78,16 @@ class CategoryController extends Controller
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
+        $before = $category->toArray();
+
         $category->fill($validated);
         $category->is_active = $request->boolean('is_active');
         $category->save();
+
+        AuditService::log('UPDATED', 'categories', $category->id, [
+            'before' => $before,
+            'after' => $category->fresh()->toArray(),
+        ]);
 
         return redirect()->route('categories.index');
     }
@@ -87,12 +97,20 @@ class CategoryController extends Controller
         $category->is_active = ! $category->is_active;
         $category->save();
 
+        AuditService::log('TOGGLED', 'categories', $category->id, [
+            'is_active' => $category->is_active,
+        ]);
+
         return redirect()->route('categories.index');
     }
 
     public function destroy(Category $category): RedirectResponse
     {
+        $data = $category->toArray();
+
         $category->delete();
+
+        AuditService::log('DELETED', 'categories', $data['id'], $data);
 
         return redirect()->route('categories.index');
     }

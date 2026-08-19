@@ -186,7 +186,7 @@
                         class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                     >
                         @foreach ($roles as $role)
-                            <option value="{{ $role->id }}" @selected(old('role_id', $employee->role_id) == $role->id)>
+                            <option value="{{ $role->id }}" @selected(old('role_id', $employee->roles->first()?->id) == $role->id)>
                                 {{ $roleLabels[$role->name] ?? $role->name }}
                             </option>
                         @endforeach

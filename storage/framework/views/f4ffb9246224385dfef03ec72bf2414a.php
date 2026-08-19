@@ -106,7 +106,7 @@
                 <?php $__empty_1 = true; $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr
                         data-employee-row
-                        data-employee-search="<?php echo e(strtolower(trim($employee->full_name . ' ' . $employee->email . ' ' . ($employee->DUI ?? '') . ' ' . ($employee->address ?? '') . ' ' . ($roleLabels[$employee->role?->name] ?? $employee->role?->name ?? '')))); ?>"
+                        data-employee-search="<?php echo e(strtolower(trim($employee->full_name . ' ' . $employee->email . ' ' . ($employee->DUI ?? '') . ' ' . ($employee->address ?? '') . ' ' . ($roleLabels[$employee->roles->first()?->name] ?? $employee->roles->first()?->name ?? '')))); ?>"
                         class="<?php echo e($employee->is_active ? 'hover:bg-brand-50/40 dark:hover:bg-neutral-800/50' : 'bg-neutral-50 hover:bg-neutral-100/60 dark:bg-neutral-800/30 dark:hover:bg-neutral-800/60'); ?>"
                     >
                         <td class="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400 sm:px-6">#<?php echo e($employee->id); ?></td>
@@ -123,9 +123,9 @@
 
                         </td>
                         <td class="hidden whitespace-nowrap px-4 py-3 sm:px-6 md:table-cell">
-                            <?php if($employee->role): ?>
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo e($roleBadges[$employee->role->name] ?? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'); ?>">
-                                    <?php echo e($roleLabels[$employee->role->name] ?? $employee->role->name); ?>
+                            <?php if($employee->roles->first()): ?>
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo e($roleBadges[$employee->roles->first()->name] ?? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'); ?>">
+                                    <?php echo e($roleLabels[$employee->roles->first()->name] ?? $employee->roles->first()->name); ?>
 
                                 </span>
                             <?php else: ?>

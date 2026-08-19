@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuditService;
 use App\Services\PosService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -69,6 +70,11 @@ class PosController extends Controller
             shift: $validated['shift'],
         );
 
+        AuditService::log('OPENED', 'cash_registers', $register->id, [
+            'opening_amount' => $register->opening_amount,
+            'shift' => $register->shift,
+        ]);
+
         return response()->json($register);
     }
 
@@ -96,6 +102,13 @@ class PosController extends Controller
                 amountReceived: $validated['amount_received'],
                 observations: $validated['observations'] ?? null,
             );
+
+            AuditService::log('SALE_COMPLETED', 'sales', $sale->id, [
+                'ticket_number' => $sale->ticket_number,
+                'total' => $sale->total,
+                'payment_method' => $sale->payment_method,
+                'items_count' => count($validated['items']),
+            ]);
 
             return response()->json(['sale' => $sale]);
         } catch (\RuntimeException $e) {

@@ -1,18 +1,21 @@
 # AGENTS.md
 
-Laravel 13.24 app (app name: `Glenda_Store`). Early-stage: a custom (placeholder) auth flow, a dashboard with ApexCharts, and 10 module pages all rendering a shared "under construction" view. The full schema from `database.md` IS implemented as migrations (13 total). Models exist for the transactional core (`User`, `Role`, `Category`, `Product`, `Customer`, `CashRegister`, `Sale`, `SaleDetail`) plus `DashboardService`; the returns/audit tables have no models yet. Not yet a git repo.
+Laravel 13.24 app (app name: `Glenda_Store`). A POS/inventory system with 10 fully-built module pages (categories, employees, roles, audit, POS, cash registers, inventory, returns, reports, settings). The full schema from `database.md` is implemented as migrations (24 total). Models exist for all tables including `ProductReturn`, `ReturnDetail`, `AuditLog`, `Permission`, `Resource`, `Action`. Not yet a git repo.
 
 ## Docs vs. reality (trust the code)
 
 - `README.md` brands the project "MODERATIO" with badges claiming Laravel 11, Tailwind 3.4, MySQL 8.2, JWT/Sanctum — all stale. Actual stack: Laravel 13, Tailwind v4, MySQL for local dev, and **no** JWT or Sanctum package installed (`composer.json` requires only `laravel/framework` + `laravel/tinker`).
-- `database.md` is the authoritative schema reference — now implemented. Tables: `roles`, `users` (custom: `full_name`/`username`/`is_active`/`role_id`, login by username, **no** `email`/`remember_token`), `customers`, `categories` (self-FK `parent_category_id`), `products`, `cash_registers`, `sales`, `sale_details`, `returns`, `return_details`, `audit_log`. Enums are native MySQL `enum` columns (`ADMINISTRATOR/CASHIER/WAREHOUSE`, `OPEN/CLOSED`, `COMPLETED/CANCELLED/PARTIALLY_RETURNED`, `CASH/CARD/TRANSFER`, `REGULAR/FREQUENT/WHOLESALER`).
-- The `users` table is created by editing the **default** migration `0001_01_01_000000_create_users_table.php` (its `role_id` FK is added later in the `create_roles_table` migration). Do not rename/drop columns in a new migration — `renameColumn` is unsupported on the SQLite test runner.
+- `database.md` is the authoritative schema reference. Tables: `roles`, `users`, `user_has_roles` (pivot), `customers`, `categories`, `products`, `cash_registers`, `sales`, `sale_details`, `returns`, `return_details`, `audit_log`, `resources`, `actions`, `permissions`, `role_has_permissions`, `user_has_permissions`. Enums are native MySQL `enum` columns.
+- Users are linked to roles via `user_has_roles` pivot table (N:N). The `users` table has no `role_id` column — `EmployeeController` uses `$user->roles()->sync()`. `User::roles()` is `belongsToMany`. Views access role via `$employee->roles->first()`.
+- Roles are free-text strings (varchar 100, unique), not enums. Roles have `is_active` and `is_super_admin` boolean columns.
+- Do not rename/drop columns in a new migration — `renameColumn` is unsupported on the SQLite test runner. Avoid `dropColumn` on columns with composite indexes on SQLite (drop the index first).
 
 ## Current state & gotchas
 
-- Auth is NOT functional: `AuthController::store` just redirects to `dashboard` with no credential check and no `auth` middleware — anyone can reach `/dashboard` without logging in. `php artisan db:seed` (via `DatabaseSeeder`) creates the 3 roles and user `testuser`/`password`, then calls `DemoDataSeeder` (~30 days of sales, no-ops if sales already exist) — but credentials are never verified anyway.
-- All 10 module routes (`/pos`, `/caja`, `/inventario`, `/categorias`, `/empleados`, `/roles`, `/devoluciones`, `/reportes`, `/bitacora`, `/configuracion`) are one-line `Route::view` placeholders pointing at `modules.under-construction`. `tests/Feature/PageTest.php` asserts their titles.
-- The dashboard queries real data via `app/Services/DashboardService.php` (KPIs + ApexCharts in `resources/js/dashboard.js`). `PageTest` uses `RefreshDatabase` because `/dashboard` hits the DB. `database/seeders/DemoDataSeeder.php` seeds ~30 days of sales — run `php artisan db:seed` (skips if sales already exist).
+- Auth is NOT functional: `AuthController::store` just redirects to `dashboard` with no credential check and no `auth` middleware — anyone can reach `/dashboard` without logging in. `php artisan db:seed` (via `DatabaseSeeder`) creates 3 roles and user `testuser`/`password` via pivot sync, then calls `DemoDataSeeder` (~30 days of sales, no-ops if sales already exist).
+- All 10 module routes are fully built with real controllers, views, and services. No more "under construction" placeholders.
+- Audit logging is fully implemented. `AuditService::log()` is called from every state-changing controller action (create, update, delete, toggle, login, logout, open/close cash register, complete sale, create return, update settings). Events: `CREATED`, `UPDATED`, `DELETED`, `TOGGLED`, `LOGIN`, `LOGOUT`, `OPENED`, `CLOSED`, `SALE_COMPLETED`. The bitácora page at `/bitacora` displays all logs with search/filter/modal.
+- The dashboard queries real data via `app/Services/DashboardService.php` (KPIs + ApexCharts in `resources/js/dashboard.js`). `database/seeders/DemoDataSeeder.php` seeds ~30 days of sales — run `php artisan db:seed`.
 - `layouts/app.blade.php` uses Blade `@yield`/`@section`, not Blade components.
 - Layouts reference `storage/logobg.png` and `storage/portada.jpg` through the `public/storage` junction — keep those files present or pages show broken images. **Gotcha**: `public/storage` must be a Windows junction to `storage/app/public` (created by `php artisan storage:link`). If it's a real empty directory, images 404. `storage:link` refuses to replace an existing real directory (even with `--force`, which only deletes symlinks), so delete `public\storage` first, then rerun it.
 
@@ -25,7 +28,7 @@ Laravel 13.24 app (app name: `Glenda_Store`). Early-stage: a custom (placeholder
 
 ## Tests
 
-- `composer test` (runs `php artisan config:clear` then `php artisan test`); plain `php artisan test` also works. Suite: 6 tests — `PageTest` (4) plus the two `ExampleTest`s.
+- `composer test` (runs `php artisan config:clear` then `php artisan test`); plain `php artisan test` also works. Suite: 24 tests — `PageTest` (20), `EmployeeTest` (6), plus the two `ExampleTest`s.
 - `phpunit.xml` overrides everything: in-memory SQLite, array cache/session, sync queue, array mail. No MySQL needed to run tests. PHPUnit 12.
 - **Gotcha**: the 8.4 build ships `pdo_sqlite`/`sqlite3` but they are commented out in `C:\php\php.ini` (lines ~935/946), so the suite currently errors with `could not find driver (Connection: sqlite...)`. Uncomment `extension=pdo_sqlite` and `extension=sqlite3` there to make tests pass. (The XAMPP 8.2 build has the driver but fails the version check.)
 
@@ -45,12 +48,12 @@ Laravel 13.24 app (app name: `Glenda_Store`). Early-stage: a custom (placeholder
 Standard Laravel conventions; keep structure clean and consistent:
 
 - **Models** (`app/Models/`): singular StudlyCase; `$fillable`, casts, relations. No raw SQL or business logic. Note: `User` uses Eloquent attributes `#[Fillable]`/`#[Hidden]` (Laravel 13) instead of `$fillable`/`$hidden`.
-- **Controllers**: thin — validate with Form Requests (`app/Http/Requests/`) and delegate to services; never business logic or queries in controllers.
-- **Business logic** in `app/Services/` (one class per domain/feature), constructor dependency injection; repositories only if they add value.
+- **Controllers**: thin — validate inline or with Form Requests, delegate to services; never business logic or queries in controllers.
+- **Business logic** in `app/Services/` (one class per domain/feature), constructor dependency injection.
+- **Audit logging**: `AuditService::log($action, $table, $recordId, $details)` — called from every state-changing controller action. Always pass before/after snapshots for updates.
 - **Output**: API Resources or Eloquent casts; do not expose sensitive fields.
-- **Routes**: declarative and named in `routes/web.php` (or `api.php`); never logic in the routes file.
+- **Routes**: declarative and named in `routes/web.php`; never logic in the routes file.
 - **Migrations**: plural snake_case tables, snake_case columns; every schema change is a new migration, never edit a published one. Use factories and seeders for test data.
 - **Middlewares**: cross-cutting logic (auth, roles, logging) as middleware, never inline in controllers.
-- **Auth API**: stateless JWT; when the package is installed, configure it as a guard in `config/auth.php`. No sessions for APIs.
 - **Tests**: Feature for HTTP flows, Unit for pure logic; every feature or fix ships with a test.
 - **Verify before finishing**: `vendor/bin/pint`, `composer test`, and `npm run build` when applicable.
