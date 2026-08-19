@@ -90,19 +90,19 @@
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
                     <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Rol</dt>
                     <dd>
-                        @if ($employee->role)
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $roleBadges[$employee->role->name] ?? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400' }}">
-                                {{ $roleLabels[$employee->role->name] ?? $employee->role->name }}
+                        @if ($employee->roles->first())
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $roleBadges[$employee->roles->first()->name] ?? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400' }}">
+                                {{ $roleLabels[$employee->roles->first()->name] ?? $employee->roles->first()->name }}
                             </span>
                         @else
                             <span class="text-sm text-neutral-400 dark:text-neutral-500">—</span>
                         @endif
                     </dd>
                 </div>
-                @if ($employee->role?->description)
+                @if ($employee->roles->first()?->description)
                     <div class="flex items-center justify-between gap-6 px-4 py-3">
                         <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Descripción del rol</dt>
-                        <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $employee->role->description }}</dd>
+                        <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $employee->roles->first()->description }}</dd>
                     </div>
                 @endif
                 <div class="flex items-center justify-between gap-6 px-4 py-3">

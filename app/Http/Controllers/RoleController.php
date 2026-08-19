@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,7 +35,9 @@ class RoleController extends Controller
 
         $validated['is_active'] = $request->boolean('is_active');
 
-        Role::create($validated);
+        $role = Role::create($validated);
+
+        AuditService::log('CREATED', 'roles', $role->id, $validated);
 
         return redirect()->route('roles.index');
     }
@@ -59,9 +62,16 @@ class RoleController extends Controller
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
+        $before = $role->toArray();
+
         $role->fill($validated);
         $role->is_active = $request->boolean('is_active');
         $role->save();
+
+        AuditService::log('UPDATED', 'roles', $role->id, [
+            'before' => $before,
+            'after' => $role->fresh()->toArray(),
+        ]);
 
         return redirect()->route('roles.index');
     }
@@ -71,12 +81,20 @@ class RoleController extends Controller
         $role->is_active = ! $role->is_active;
         $role->save();
 
+        AuditService::log('TOGGLED', 'roles', $role->id, [
+            'is_active' => $role->is_active,
+        ]);
+
         return redirect()->route('roles.index');
     }
 
     public function destroy(Role $role): RedirectResponse
     {
+        $data = $role->toArray();
+
         $role->delete();
+
+        AuditService::log('DELETED', 'roles', $data['id'], $data);
 
         return redirect()->route('roles.index');
     }

@@ -31,15 +31,16 @@ class DatabaseSeeder extends Seeder
             ['description' => 'Manages inventory'],
         );
 
-        User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'testuser@test.com'],
             [
-                'role_id' => $administrator->id,
                 'full_name' => 'Test User',
                 'password' => bcrypt('password'),
                 'is_active' => true,
             ],
         );
+
+        $user->roles()->syncWithoutDetaching([$administrator->id]);
 
         $this->call(DemoDataSeeder::class);
     }

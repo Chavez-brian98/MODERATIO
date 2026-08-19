@@ -28,11 +28,17 @@ class EmployeeTest extends TestCase
             'is_active' => '1',
         ])->assertRedirect('/empleados');
 
+        $userId = User::where('email', 'ana.lopez@test.com')->first()->id;
+
         $this->assertDatabaseHas('users', [
             'full_name' => 'Ana María López',
             'email' => 'ana.lopez@test.com',
-            'role_id' => $role->id,
             'is_active' => true,
+        ]);
+
+        $this->assertDatabaseHas('user_has_roles', [
+            'user_id' => $userId,
+            'role_id' => $role->id,
         ]);
 
         $this->assertNotEquals('password123', User::where('email', 'ana.lopez@test.com')->first()->password);
@@ -41,12 +47,12 @@ class EmployeeTest extends TestCase
     public function test_employee_requires_unique_email(): void
     {
         $role = $this->role();
-        User::create([
+        $user = User::create([
             'full_name' => 'Existing User',
             'email' => 'ana.lopez@test.com',
             'password' => 'password123',
-            'role_id' => $role->id,
         ]);
+        $user->roles()->sync($role->id);
 
         $this->post('/empleados', [
             'full_name' => 'Another User',
@@ -63,9 +69,9 @@ class EmployeeTest extends TestCase
             'full_name' => 'Ana López',
             'email' => 'ana.lopez@test.com',
             'password' => 'password123',
-            'role_id' => $role->id,
             'is_active' => true,
         ]);
+        $employee->roles()->sync($role->id);
 
         $this->put("/empleados/{$employee->id}", [
             'full_name' => 'Ana María López',
@@ -88,9 +94,9 @@ class EmployeeTest extends TestCase
             'full_name' => 'Ana López',
             'email' => 'ana.lopez@test.com',
             'password' => 'password123',
-            'role_id' => $role->id,
             'is_active' => true,
         ]);
+        $employee->roles()->sync($role->id);
 
         $this->patch("/empleados/{$employee->id}/estado")
             ->assertRedirect('/empleados');
@@ -105,8 +111,8 @@ class EmployeeTest extends TestCase
             'full_name' => 'Ana López',
             'email' => 'ana.lopez@test.com',
             'password' => 'password123',
-            'role_id' => $role->id,
         ]);
+        $employee->roles()->sync($role->id);
 
         $this->delete("/empleados/{$employee->id}")
             ->assertRedirect('/empleados');
@@ -121,8 +127,8 @@ class EmployeeTest extends TestCase
             'full_name' => 'Ana López',
             'email' => 'ana.lopez@test.com',
             'password' => 'password123',
-            'role_id' => $role->id,
         ]);
+        $employee->roles()->sync($role->id);
 
         $this->get('/empleados')->assertOk()->assertSee('Empleados');
         $this->get('/empleados/crear')->assertOk()->assertSee('Nuevo empleado');

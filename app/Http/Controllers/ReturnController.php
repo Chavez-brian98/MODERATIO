@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductReturn;
 use App\Models\Sale;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -64,6 +65,8 @@ class ReturnController extends Controller
             'created_at' => now(),
         ]);
 
+        $productDetails = [];
+
         foreach ($validated['products'] as $item) {
             $return->details()->create([
                 'product_id' => $item['product_id'],
@@ -73,7 +76,20 @@ class ReturnController extends Controller
 
             Product::where('id', $item['product_id'])
                 ->increment('current_stock', $item['quantity']);
+
+            $productDetails[] = [
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'subtotal' => $item['subtotal'],
+            ];
         }
+
+        AuditService::log('CREATED', 'returns', $return->id, [
+            'sale_id' => $validated['sale_id'],
+            'reason' => $validated['reason'],
+            'total_returned' => $totalReturned,
+            'products' => $productDetails,
+        ]);
 
         return redirect()->route('returns.show', $return)
             ->with('success', 'Devolución registrada correctamente.');

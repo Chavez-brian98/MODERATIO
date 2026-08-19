@@ -11,6 +11,9 @@
             'TOGGLED' => 'Cambio de estado',
             'LOGIN' => 'Inicio de sesión',
             'LOGOUT' => 'Cierre de sesión',
+            'OPENED' => 'Apertura',
+            'CLOSED' => 'Cierre',
+            'SALE_COMPLETED' => 'Venta realizada',
         ];
         $actionBadges = [
             'CREATED' => 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-400',
@@ -19,6 +22,9 @@
             'TOGGLED' => 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
             'LOGIN' => 'bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400',
             'LOGOUT' => 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400',
+            'OPENED' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+            'CLOSED' => 'bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400',
+            'SALE_COMPLETED' => 'bg-violet-50 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
         ];
         $tableLabels = [
             'users' => 'Empleados',
@@ -29,6 +35,8 @@
             'sale_details' => 'Detalle de ventas',
             'cash_registers' => 'Cajas',
             'customers' => 'Clientes',
+            'returns' => 'Devoluciones',
+            'settings' => 'Configuración',
         ];
 
         $todayCount = $logs->filter(fn ($log) => $log->created_at->isToday())->count();
