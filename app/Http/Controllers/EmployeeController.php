@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Action;
+use App\Models\Permission;
+use App\Models\Resource;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuditService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,6 +20,7 @@ class EmployeeController extends Controller
     {
         $employees = User::query()
             ->with('roles')
+            ->withCount('permissions')
             ->orderBy('full_name')
             ->get();
 
@@ -46,13 +52,6 @@ class EmployeeController extends Controller
 
         $user = User::create($validated + ['is_active' => $request->boolean('is_active')]);
         $user->roles()->sync($roleId);
-
-        AuditService::log('CREATED', 'users', $user->id, [
-            'full_name' => $user->full_name,
-            'email' => $user->email,
-            'role_id' => $roleId,
-            'is_active' => $user->is_active,
-        ]);
 
         return redirect()->route('employees.index');
     }
@@ -92,17 +91,10 @@ class EmployeeController extends Controller
             unset($validated['password']);
         }
 
-        $before = $employee->toArray();
-
         $employee->fill($validated);
         $employee->is_active = $request->boolean('is_active');
         $employee->save();
         $employee->roles()->sync($roleId);
-
-        AuditService::log('UPDATED', 'users', $employee->id, [
-            'before' => $before,
-            'after' => $employee->fresh()->toArray(),
-        ]);
 
         return redirect()->route('employees.index');
     }
@@ -110,7 +102,8 @@ class EmployeeController extends Controller
     public function toggleActive(User $employee): RedirectResponse
     {
         $employee->is_active = ! $employee->is_active;
-        $employee->save();
+
+        Model::withoutEvents(fn () => $employee->save());
 
         AuditService::log('TOGGLED', 'users', $employee->id, [
             'is_active' => $employee->is_active,
@@ -121,12 +114,99 @@ class EmployeeController extends Controller
 
     public function destroy(User $employee): RedirectResponse
     {
-        $data = $employee->toArray();
-
         $employee->delete();
 
-        AuditService::log('DELETED', 'users', $data['id'], $data);
-
         return redirect()->route('employees.index');
+    }
+
+    public function permissions(User $employee): View
+    {
+        $employee->load(['roles.permissions', 'permissions']);
+        $role = $employee->roles->first();
+
+        $effectiveIds = $employee->effectivePermissionIds();
+        $states = [];
+
+        foreach (Permission::query()->pluck('id') as $permissionId) {
+            $states[$permissionId] = in_array($permissionId, $effectiveIds, true);
+        }
+
+        return view('modules.shared.partials.permissions-modal', [
+            'modalTitle' => 'Permisos · '.$employee->full_name,
+            'formAction' => route('employees.permissions.sync', $employee),
+            'matrixMode' => 'states',
+            'matrixStates' => $states,
+            'matrixInheritedIds' => $role ? $role->permissions->pluck('id')->all() : [],
+            'superToggleChecked' => null,
+            'lockedMatrix' => (bool) ($role?->is_super_admin),
+            'lockedHint' => $role?->is_super_admin
+                ? 'Su rol '.$role->name.' es super administrador: este usuario tiene acceso total.'
+                : null,
+            'legend' => 'Desmarcar un permiso que hereda de su rol lo bloqueará solo para este usuario.',
+            'resources' => Resource::query()->with(['permissions.action'])->orderBy('display_name')->get(),
+            'actions' => Action::query()->orderBy('id')->get(),
+        ]);
+    }
+
+    public function syncPermissions(Request $request, User $employee): RedirectResponse|JsonResponse
+    {
+        $validated = $request->validate([
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['string', 'in:allow,deny,inherit'],
+        ]);
+
+        $before = $this->overrideSnapshot($employee);
+
+        $role = $employee->roles->first();
+        $rolePermissionIds = $role ? $role->permissions()->pluck('permissions.id')->all() : [];
+        $validIds = Permission::query()->pluck('id')->all();
+
+        $rows = [];
+
+        foreach ($validated['permissions'] ?? [] as $permissionId => $state) {
+            $permissionId = (int) $permissionId;
+
+            if (! in_array($permissionId, $validIds, true)) {
+                continue;
+            }
+
+            $roleHas = in_array($permissionId, $rolePermissionIds, true);
+
+            if ($state === 'allow' && ! $roleHas) {
+                $rows[$permissionId] = ['type' => 'grant'];
+            } elseif ($state === 'deny' && $roleHas) {
+                $rows[$permissionId] = ['type' => 'deny'];
+            }
+        }
+
+        $employee->permissions()->sync($rows);
+
+        AuditService::log('PERMISSIONS_UPDATED', 'user_has_permissions', $employee->id, [
+            'before' => $before,
+            'after' => $this->overrideSnapshot($employee->fresh()),
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('employees.index')
+            ->with('success', 'Permisos actualizados correctamente.');
+    }
+
+    private function overrideSnapshot(User $employee): array
+    {
+        return [
+            'grants' => $employee->permissions()
+                ->wherePivot('type', 'grant')
+                ->orderBy('name')
+                ->pluck('name')
+                ->all(),
+            'denies' => $employee->permissions()
+                ->wherePivot('type', 'deny')
+                ->orderBy('name')
+                ->pluck('name')
+                ->all(),
+        ];
     }
 }

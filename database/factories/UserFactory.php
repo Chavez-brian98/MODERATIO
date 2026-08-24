@@ -29,7 +29,9 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'address' => fake()->address(),
             'DUI' => null,
-            'birthday' => fake()->optional()->dateTimeBetween('-60 years', '-18 years')->format('Y-m-d'),
+            'birthday' => fake()->boolean(80)
+                ? fake()->dateTimeBetween('-60 years', '-18 years')->format('Y-m-d')
+                : null,
             'is_active' => true,
         ];
     }

@@ -32,16 +32,17 @@ class DatabaseSeeder extends Seeder
         );
 
         $user = User::firstOrCreate(
-            ['email' => 'testuser@test.com'],
+            ['email' => 'brian@modeartio.com'],
             [
-                'full_name' => 'Test User',
-                'password' => bcrypt('password'),
+                'full_name' => 'BRIAN JOSUE CHAVEZ RECINOS',
+                'password' => bcrypt('1234'),
                 'is_active' => true,
             ],
         );
 
         $user->roles()->syncWithoutDetaching([$administrator->id]);
 
+        $this->call(PermissionSeeder::class);
         $this->call(DemoDataSeeder::class);
     }
 }

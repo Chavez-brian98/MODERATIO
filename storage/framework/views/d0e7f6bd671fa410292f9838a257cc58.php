@@ -39,6 +39,9 @@
                 'sale_details' => 'Detalle de ventas',
                 'cash_registers' => 'Cajas',
                 'customers' => 'Clientes',
+                'returns' => 'Devoluciones',
+                'settings' => 'Configuración',
+                'user_has_permissions' => 'Permisos de usuario',
             ];
         ?>
 

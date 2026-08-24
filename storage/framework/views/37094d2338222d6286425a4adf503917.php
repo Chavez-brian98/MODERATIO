@@ -12,6 +12,7 @@
             'OPENED' => 'Apertura',
             'CLOSED' => 'Cierre',
             'SALE_COMPLETED' => 'Venta realizada',
+            'PERMISSIONS_UPDATED' => 'Permisos actualizados',
         ];
         $actionBadges = [
             'CREATED' => 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-400',
@@ -23,6 +24,7 @@
             'OPENED' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
             'CLOSED' => 'bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400',
             'SALE_COMPLETED' => 'bg-violet-50 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
+            'PERMISSIONS_UPDATED' => 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-400',
         ];
         $tableLabels = [
             'users' => 'Empleados',
@@ -35,6 +37,7 @@
             'customers' => 'Clientes',
             'returns' => 'Devoluciones',
             'settings' => 'Configuración',
+            'user_has_permissions' => 'Permisos de usuario',
         ];
 
         $todayCount = $logs->filter(fn ($log) => $log->created_at->isToday())->count();

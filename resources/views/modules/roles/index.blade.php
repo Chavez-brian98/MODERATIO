@@ -105,6 +105,14 @@
                             <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-400">
                                 {{ $role->name }}
                             </span>
+                            @if ($role->is_super_admin)
+                                <span class="ml-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/40 dark:text-violet-400">
+                                    Super
+                                </span>
+                            @endif
+                            <p class="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
+                                {{ $role->permissions_count ?? 0 }} {{ ($role->permissions_count ?? 0) === 1 ? 'permiso' : 'permisos' }}
+                            </p>
                         </td>
                         <td class="hidden max-w-[200px] truncate px-4 py-3 text-sm text-neutral-500 dark:text-neutral-400 sm:px-6 md:table-cell">
                             {{ $role->description ?? '—' }}
@@ -140,6 +148,17 @@
                                         class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm dark:text-brand-400 dark:hover:bg-brand-900/40"
                                     >
                                         <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
+                                    </button>
+                                @endif
+
+                                @if ($role->is_active && Route::has('roles.permissions'))
+                                    <button
+                                        type="button"
+                                        title="Permisos"
+                                        data-permissions-role="{{ route('roles.permissions', $role) }}"
+                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
+                                    >
+                                        <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
                                     </button>
                                 @endif
 
@@ -357,6 +376,7 @@
                     }
                 });
             });
+
         });
     </script>
 @endsection

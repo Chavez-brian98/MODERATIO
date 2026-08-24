@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\AuditService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -67,8 +68,6 @@ class InventoryController extends Controller
 
         $product = Product::create($validated);
 
-        AuditService::log('CREATED', 'products', $product->id, $validated);
-
         return redirect()->route('inventory.index')
             ->with('success', 'Producto creado correctamente.');
     }
@@ -112,15 +111,8 @@ class InventoryController extends Controller
             $validated['tax_percentage'] = 0;
         }
 
-        $before = $product->toArray();
-
         $product->fill($validated);
         $product->save();
-
-        AuditService::log('UPDATED', 'products', $product->id, [
-            'before' => $before,
-            'after' => $product->fresh()->toArray(),
-        ]);
 
         return redirect()->route('inventory.index')
             ->with('success', 'Producto actualizado correctamente.');
@@ -129,7 +121,8 @@ class InventoryController extends Controller
     public function toggleActive(Product $product): RedirectResponse
     {
         $product->is_active = ! $product->is_active;
-        $product->save();
+
+        Model::withoutEvents(fn () => $product->save());
 
         AuditService::log('TOGGLED', 'products', $product->id, [
             'is_active' => $product->is_active,
@@ -140,11 +133,7 @@ class InventoryController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        $data = $product->toArray();
-
         $product->delete();
-
-        AuditService::log('DELETED', 'products', $data['id'], $data);
 
         return redirect()->route('inventory.index');
     }

@@ -113,6 +113,13 @@
                         <td class="whitespace-nowrap px-4 py-3 sm:px-6">
                             <p class="<?php echo e($employee->is_active ? 'font-medium text-neutral-900 dark:text-white' : 'font-medium text-neutral-400 dark:text-neutral-500'); ?>"><?php echo e($employee->full_name); ?></p>
                             <p class="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500"><?php echo e($employee->email); ?></p>
+                            <?php if(($employee->permissions_count ?? 0) > 0): ?>
+                                <p class="mt-1 inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+                                    <i class="fa-solid fa-user-shield text-[9px]" aria-hidden="true"></i>
+                                    <?php echo e($employee->permissions_count); ?> <?php echo e($employee->permissions_count === 1 ? 'permiso propio' : 'permisos propios'); ?>
+
+                                </p>
+                            <?php endif; ?>
                         </td>
                         <td class="hidden whitespace-nowrap px-4 py-3 text-sm text-neutral-500 dark:text-neutral-400 sm:px-6 md:table-cell">
                             <?php echo e($employee->DUI ?? '—'); ?>
@@ -170,6 +177,17 @@
                                     >
                                         <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
                                     </a>
+                                <?php endif; ?>
+
+                                <?php if($employee->is_active && Route::has('employees.permissions')): ?>
+                                    <button
+                                        type="button"
+                                        title="Permisos"
+                                        data-permissions-user="<?php echo e(route('employees.permissions', $employee)); ?>"
+                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
+                                    >
+                                        <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
+                                    </button>
                                 <?php endif; ?>
 
                                 <?php if($employee->is_active && Route::has('employees.toggle')): ?>

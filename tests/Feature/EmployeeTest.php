@@ -11,6 +11,13 @@ class EmployeeTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->signIn();
+    }
+
     private function role(): Role
     {
         return Role::create(['name' => 'CASHIER', 'description' => 'Can operate the POS']);
