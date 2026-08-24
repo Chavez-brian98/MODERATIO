@@ -22,35 +22,26 @@
     </script>
 </head>
 <body class="min-h-screen bg-brand-50 font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
-<div class="group sidebar-group lg:grid lg:grid-cols-[4.5rem_1fr] transition-[grid-template-columns] duration-300 desktop-sidebar-collapsed">
-
-    <!-- Mobile hamburger button (outside sidebar, fixed) -->
-    <button
-        type="button"
-        data-sidebar-toggle
-        title="Menú"
-        aria-label="Abrir o cerrar menú"
-        class="fixed left-4 top-4 z-[60] flex cursor-pointer items-center justify-center rounded-full border border-brand-200 bg-white p-2.5 text-neutral-500 shadow-md transition-all duration-300 hover:bg-brand-100 hover:text-brand-800 lg:hidden dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
-        style="left: 1rem; top: 1rem;"
-    >
-        <svg class="h-5 w-5 sidebar-hamburger-open" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" class="stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <svg class="hidden h-5 w-5 sidebar-hamburger-close" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M6 18 18 6M6 6l12 12" class="stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    </button>
-
-    <!-- Mobile backdrop -->
-    <label for="sidebar-toggle" aria-hidden="true" class="mobile-backdrop pointer-events-none fixed inset-0 z-40 cursor-default bg-neutral-900/40 opacity-0 transition-opacity duration-300 lg:hidden"></label>
+<div class="lg:grid lg:grid-cols-[17rem_1fr] sidebar-layout">
 
     <!-- Sidebar -->
-    <aside class="mobile-drawer fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] -translate-x-full flex-col overflow-y-auto border-r border-brand-200 bg-white p-4 shadow-xl transition-transform duration-300 lg:bottom-auto lg:left-auto lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:sticky lg:top-0 lg:h-screen lg:p-5 dark:border-neutral-800 dark:bg-neutral-900">
-        <input type="checkbox" id="sidebar-toggle" autocomplete="off" class="sr-only"/>
+    <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:flex-none lg:border-r lg:border-brand-200 lg:bg-white lg:p-4 lg:sticky lg:top-0 lg:h-screen dark:lg:border-neutral-800 dark:lg:bg-neutral-900 sidebar-sidebar relative">
+
+        <!-- Botón de Toggle Redondo en el borde derecho -->
+        <button
+            type="button"
+            id="sidebar-toggle-btn"
+            aria-label="Expandir/Colapsar barra lateral"
+            class="hidden lg:flex absolute -right-4 top-8 z-50 items-center justify-center w-8 h-8 rounded-full border border-brand-200 bg-white shadow-md transition-all duration-200 hover:shadow-lg hover:bg-brand-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-500"
+        >
+            <svg class="w-4 h-4 transition-transform duration-200 sidebar-toggle-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
 
         <!-- Logo -->
-        <div class="flex justify-center px-2 mb-6">
-            <a href="{{ route('dashboard') }}" class="block sidebar-logo-full">
+        <div class="mb-6 flex justify-center sidebar-logo-full">
+            <a href="{{ route('dashboard') }}">
                 <img src="{{ asset('storage/logobg.png') }}" alt="Glenda Store" class="mx-auto h-16 w-auto max-w-full object-contain sm:h-20"/>
             </a>
             <a href="{{ route('dashboard') }}" class="hidden sidebar-logo-collapsed justify-center">
@@ -58,20 +49,7 @@
             </a>
         </div>
 
-        <!-- Desktop collapse/expand button (inside sidebar, top right) -->
-        <button
-            type="button"
-            data-sidebar-toggle
-            title="Colapsar o expandir sidebar"
-            aria-label="Colapsar o expandir sidebar"
-            class="absolute right-0 top-4 z-20 -translate-x-1/2 translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border border-brand-200 bg-white p-2 text-neutral-500 shadow-md transition-all duration-300 hover:bg-brand-100 hover:text-brand-800 lg:flex dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
-        >
-            <svg class="h-5 w-5 transition-transform duration-300 sidebar-collapse-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" class="stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-
-        <nav class="mt-2 flex-1 space-y-1 lg:overflow-x-hidden lg:overflow-y-auto sidebar-nav">
+        <nav class="flex-1 space-y-1 overflow-y-auto sidebar-nav pr-2">
             @php
                 $sections = [
                     [
@@ -131,7 +109,7 @@
                 @endphp
 
                 @if ($visibleItems->isNotEmpty())
-                    <p class="mt-5 px-2 text-xs font-semibold uppercase tracking-wider text-brand-500 sidebar-section-title dark:text-brand-400">{{ $section['title'] }}</p>
+                    <p class="mt-5 px-2 text-xs font-semibold uppercase tracking-wider text-brand-500 dark:text-brand-400 sidebar-section-title">{{ $section['title'] }}</p>
                     <div class="mt-1.5 space-y-1">
                         @foreach ($visibleItems as $module)
                             <a
@@ -158,7 +136,7 @@
             <button
                 type="button"
                 id="theme-toggle"
-                class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-brand-100 hover:text-brand-800 sidebar-theme-toggle dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-brand-100 hover:text-brand-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white sidebar-theme-toggle"
             >
                 <i class="fa-solid fa-circle-half-stroke h-5 w-5 shrink-0 text-center" aria-hidden="true"></i>
                 <span class="sidebar-theme-label" id="theme-label">Modo oscuro</span>
@@ -173,7 +151,7 @@
                     aria-haspopup="menu"
                     aria-expanded="false"
                     title="{{ auth()->user()->full_name }}"
-                    class="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-brand-100 sidebar-user-menu dark:hover:bg-neutral-800"
+                    class="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-brand-100 dark:hover:bg-neutral-800 sidebar-user-menu"
                 >
                     @if (auth()->user()->photoUrl())
                         <img
@@ -222,7 +200,7 @@
         @endif
     </aside>
 
-    <main class="p-6 sm:p-10 lg:pl-4 lg:pr-10 lg:pt-6 lg:pb-10">
+    <main class="p-6 sm:p-10 main-content">
         @yield('content')
     </main>
 </div>
@@ -230,94 +208,30 @@
 @yield('scripts')
 <script>
     (() => {
-        const sidebarToggle = document.getElementById('sidebar-toggle');
         const html = document.documentElement;
+        const toggleBtn = document.getElementById('sidebar-toggle-btn');
+        const toggleIcon = document.querySelector('.sidebar-toggle-icon');
+        const sidebar = document.querySelector('.sidebar-sidebar');
+        const mainContent = document.querySelector('.main-content');
 
         // Initialize from localStorage
         const savedSidebar = localStorage.getItem('sidebar-collapsed');
         if (savedSidebar === 'true') {
-            sidebarToggle.checked = true;
             html.classList.add('sidebar-collapsed');
-        } else {
-            sidebarToggle.checked = false;
-            html.classList.remove('sidebar-collapsed');
+            toggleIcon.style.transform = 'rotate(180deg)';
         }
 
-        const toggleSidebar = (force) => {
-            if (typeof force === 'boolean') {
-                sidebarToggle.checked = force;
-            } else {
-                sidebarToggle.checked = !sidebarToggle.checked;
-            }
-            html.classList.toggle('sidebar-collapsed', sidebarToggle.checked);
-            localStorage.setItem('sidebar-collapsed', sidebarToggle.checked);
+        const toggleSidebar = () => {
+            const isCollapsed = html.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', isCollapsed);
+
+            // Rotate icon
+            toggleIcon.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
         };
 
-        const closeMobileDrawer = () => {
-            if (window.innerWidth < 1024) {
-                sidebarToggle.checked = false;
-                html.classList.remove('sidebar-collapsed');
-                localStorage.setItem('sidebar-collapsed', 'false');
-            }
-        };
-
-        // Toggle buttons
-        document.querySelectorAll('[data-sidebar-toggle]').forEach((toggle) => {
-            toggle.addEventListener('click', (event) => {
-                event.preventDefault();
-                toggleSidebar();
-            });
-        });
-
-        // Close mobile drawer when clicking nav link on mobile
-        document.querySelectorAll('nav a[href]').forEach((link) => {
-            link.addEventListener('click', closeMobileDrawer);
-        });
-
-        // Close mobile drawer when clicking backdrop
-        document.querySelector('.mobile-backdrop')?.addEventListener('click', closeMobileDrawer);
-
-        // Desktop hover to expand collapsed sidebar
-        const sidebar = document.querySelector('aside');
-        let hoverTimeout;
-
-        sidebar?.addEventListener('mouseenter', () => {
-            if (window.innerWidth >= 1024 && sidebarToggle.checked) {
-                clearTimeout(hoverTimeout);
-                sidebarToggle.checked = false;
-                html.classList.remove('sidebar-collapsed');
-                localStorage.setItem('sidebar-collapsed', 'false');
-            }
-        });
-
-        sidebar?.addEventListener('mouseleave', () => {
-            if (window.innerWidth >= 1024 && !sidebarToggle.checked) {
-                hoverTimeout = setTimeout(() => {
-                    sidebarToggle.checked = true;
-                    html.classList.add('sidebar-collapsed');
-                    localStorage.setItem('sidebar-collapsed', 'true');
-                }, 300);
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 1024) {
-                // On desktop, ensure mobile drawer is closed
-                document.querySelector('.mobile-backdrop')?.classList.remove('opacity-100', 'pointer-events-auto');
-            }
-        });
-
-        // Initialize on load
-        window.addEventListener('pageshow', () => {
-            const saved = localStorage.getItem('sidebar-collapsed');
-            if (saved === 'true') {
-                sidebarToggle.checked = true;
-                html.classList.add('sidebar-collapsed');
-            } else {
-                sidebarToggle.checked = false;
-                html.classList.remove('sidebar-collapsed');
-            }
+        toggleBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleSidebar();
         });
     })();
 </script>

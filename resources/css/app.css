@@ -23,135 +23,86 @@
 }
 
 /* ========================================
-   SIDEBAR STATES - Controlled by #sidebar-toggle checkbox
+   SIDEBAR STATES - Controlled by .sidebar-collapsed on <html>
+   NO TRANSITIONS/ANIMATIONS - instant state changes
    ======================================== */
 
-/* Mobile drawer (open) */
-.sidebar-group:has(#sidebar-toggle:checked) .mobile-drawer {
-    transform: translateX(0);
+/* Sidebar base */
+.sidebar-sidebar {
+    width: 17rem;
+    flex-shrink: 0;
 }
 
-/* Mobile backdrop (show) */
-.sidebar-group:has(#sidebar-toggle:checked) .mobile-backdrop {
-    opacity: 1;
-    pointer-events: auto;
+/* Collapsed state */
+html.sidebar-collapsed .sidebar-sidebar {
+    width: 4.5rem;
 }
 
-/* Desktop collapsed state (when checkbox checked on desktop) */
-.sidebar-group:has(#sidebar-toggle:checked) .desktop-sidebar-collapsed {
-    min-width: 0;
-}
-
-.sidebar-group:has(#sidebar-toggle:checked) .desktop-sidebar-expanded {
+html.sidebar-collapsed .sidebar-layout {
     grid-template-columns: 4.5rem 1fr;
 }
 
-/* Hamburger icon toggle */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-hamburger-open {
-    display: none;
-}
-
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-hamburger-close {
-    display: block;
-}
-
-/* Collapse icon rotation */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-collapse-icon {
-    transform: rotate(180deg);
-}
-
 /* Logo toggle */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-logo-full {
+html.sidebar-collapsed .sidebar-logo-full {
     display: none;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-logo-collapsed {
+html.sidebar-collapsed .sidebar-logo-collapsed {
     display: flex;
 }
 
 /* Navigation collapse */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-nav {
+html.sidebar-collapsed .sidebar-nav {
     overflow: hidden;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-section-title {
+html.sidebar-collapsed .sidebar-section-title {
     display: none;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-nav-item {
+html.sidebar-collapsed .sidebar-nav-item {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-nav-label {
+html.sidebar-collapsed .sidebar-nav-label {
     display: none;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-nav-icon {
+html.sidebar-collapsed .sidebar-nav-icon {
     margin: 0 auto;
 }
 
 /* Theme toggle collapse */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-theme-toggle {
+html.sidebar-collapsed .sidebar-theme-toggle {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-theme-label {
+html.sidebar-collapsed .sidebar-theme-label {
     display: none;
 }
 
 /* User menu collapse */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-user-menu {
+html.sidebar-collapsed .sidebar-user-menu {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-user-info {
+html.sidebar-collapsed .sidebar-user-info {
     display: none;
 }
 
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-user-chevron {
+html.sidebar-collapsed .sidebar-user-chevron {
     display: none;
 }
 
-/* Mobile hamburger icons */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-hamburger-open {
-    display: none;
-}
-
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-hamburger-close {
-    display: block;
-}
-
-/* Desktop collapse icon rotation */
-.sidebar-group:has(#sidebar-toggle:checked) .sidebar-collapse-icon {
+/* Toggle icon rotation */
+html.sidebar-collapsed .sidebar-toggle-icon {
     transform: rotate(180deg);
-}
-
-/* Mobile drawer positioning fix */
-.mobile-drawer {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-}
-
-/* Mobile backdrop */
-.mobile-backdrop {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease-in-out;
-}
-
-/* Desktop grid states */
-.desktop-sidebar-expanded {
-    grid-template-columns: 17rem 1fr;
-}
-
-.desktop-sidebar-collapsed {
-    grid-template-columns: 4.5rem 1fr;
 }
 
 /* Base styles */
