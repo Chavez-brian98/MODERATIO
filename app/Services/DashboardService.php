@@ -68,7 +68,7 @@ class DashboardService
 
         for ($i = 0; $i < self::TREND_DAYS; $i++) {
             $date = $from->copy()->addDays($i);
-            $dates[] = $date->format('M d');
+            $dates[] = $date->isoFormat('MMM D');
             $totals[] = $totalsByDate->get($date->toDateString(), 0);
         }
 

@@ -3,6 +3,14 @@
 @section('title', 'Caja #' . $register->id)
 
 @section('content')
+    @php
+        $shiftLabels = [
+            'MORNING' => 'Mañana',
+            'AFTERNOON' => 'Tarde',
+            'NIGHT' => 'Noche',
+        ];
+    @endphp
+
     @include('partials.breadcrumbs', ['crumbs' => [
         ['label' => 'Caja / Arqueo', 'url' => route('cash-register.index')],
         ['label' => 'Caja #' . $register->id],
@@ -12,7 +20,7 @@
         <div>
             <h1 class="text-2xl font-bold text-brand-800 sm:text-3xl dark:text-brand-200">Caja #{{ $register->id }}</h1>
             <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                {{ $register->shift ? 'Turno: ' . $register->shift . ' — ' : '' }}{{ $register->user->full_name }}
+                {{ $register->shift ? 'Turno: ' . ($shiftLabels[$register->shift] ?? $register->shift) . ' — ' : '' }}{{ $register->user->full_name }}
             </p>
         </div>
         <div class="flex items-center gap-3">

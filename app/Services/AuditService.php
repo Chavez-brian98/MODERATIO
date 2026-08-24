@@ -13,6 +13,8 @@ class AuditService
         ?int $recordId = null,
         ?array $details = null,
         ?User $user = null,
+        ?array $oldValues = null,
+        ?array $newValues = null,
     ): AuditLog {
         return AuditLog::create([
             'user_id' => $user?->id ?? auth()->id(),
@@ -20,6 +22,8 @@ class AuditService
             'affected_table' => $table,
             'record_id' => $recordId,
             'details' => $details,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
             'source_ip' => request()->ip(),
             'created_at' => now(),
         ]);

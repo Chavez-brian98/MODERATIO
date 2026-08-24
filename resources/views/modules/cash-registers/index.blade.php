@@ -3,6 +3,14 @@
 @section('title', 'Caja / Arqueo')
 
 @section('content')
+    @php
+        $shiftLabels = [
+            'MORNING' => 'Mañana',
+            'AFTERNOON' => 'Tarde',
+            'NIGHT' => 'Noche',
+        ];
+    @endphp
+
     @include('partials.breadcrumbs', ['crumbs' => [['label' => 'Caja / Arqueo']]])
 
     <div class="mb-8">
@@ -91,9 +99,9 @@
                 </thead>
                 <tbody id="cash-register-tbody" class="divide-y divide-neutral-100 dark:divide-neutral-800">
                     @forelse ($registers as $register)
-                        <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40" data-search="{{ strtolower($register->id . ' ' . ($register->shift ?? '') . ' ' . $register->user->full_name) }}">
+                        <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40" data-search="{{ strtolower($register->id . ' ' . ($shiftLabels[$register->shift] ?? $register->shift ?? '') . ' ' . $register->user->full_name) }}">
                             <td class="px-4 py-3 font-medium text-neutral-800 dark:text-neutral-200">#{{ $register->id }}</td>
-                            <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">{{ $register->shift ?? '—' }}</td>
+                            <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">{{ $shiftLabels[$register->shift] ?? $register->shift ?? '—' }}</td>
                             <td class="hidden px-4 py-3 sm:table-cell dark:text-neutral-300">{{ $register->user->full_name }}</td>
                             <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300">${{ number_format($register->opening_amount, 2) }}</td>
                             <td class="hidden px-4 py-3 lg:table-cell dark:text-neutral-300">{{ $register->sales_count }}</td>

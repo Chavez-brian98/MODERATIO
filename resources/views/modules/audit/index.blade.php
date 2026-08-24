@@ -54,7 +54,49 @@
         </div>
     </header>
 
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <form
+        method="GET"
+        action="{{ route('audit.index') }}"
+        class="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-brand-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+    >
+        <div>
+            <label for="date_from" class="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">Desde</label>
+            <input
+                type="date"
+                id="date_from"
+                name="date_from"
+                value="{{ $filters['date_from'] }}"
+                max="{{ $filters['date_to'] }}"
+                class="rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+            />
+        </div>
+        <div>
+            <label for="date_to" class="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">Hasta</label>
+            <input
+                type="date"
+                id="date_to"
+                name="date_to"
+                value="{{ $filters['date_to'] }}"
+                min="{{ $filters['date_from'] }}"
+                class="rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+            />
+        </div>
+        <button
+            type="submit"
+            class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
+        >
+            <i class="fa-solid fa-filter text-xs" aria-hidden="true"></i>
+            Filtrar
+        </button>
+        <a
+            href="{{ route('audit.index') }}"
+            class="text-sm text-neutral-500 transition-colors hover:text-brand-700 dark:text-neutral-400 dark:hover:text-brand-400"
+        >
+            Limpiar
+        </a>
+    </form>
+
+    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="relative w-full sm:max-w-sm">
             <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -146,14 +188,14 @@
                             {{ $log->source_ip ?? '—' }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right sm:px-6">
-                            <button
-                                type="button"
+                            <a
+                                href="{{ route('audit.show', $log) }}"
                                 title="Ver detalle"
-                                data-view-audit="{{ route('audit.show', $log) }}"
-                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm ml-auto dark:text-brand-400 dark:hover:bg-brand-900/40"
+                                class="flex h-8 w-8 items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm ml-auto dark:text-brand-400 dark:hover:bg-brand-900/40"
                             >
                                 <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
-                            </button>
+                                <span class="sr-only">Ver detalle del registro #{{ $log->id }}</span>
+                            </a>
                         </td>
                     </tr>
                 @empty
@@ -182,8 +224,6 @@
 
         @include('partials.pagination', ['paginator' => $logs])
     </div>
-
-    <div id="audit-modal-container" aria-hidden="true"></div>
 @endsection
 
 @section('scripts')
@@ -221,78 +261,6 @@
             searchInput.addEventListener('input', applyFilters);
             filterAction.addEventListener('change', applyFilters);
             filterTable.addEventListener('change', applyFilters);
-
-            const modalContainer = document.getElementById('audit-modal-container');
-            const modalTrigger = { element: null };
-
-            const closeAuditModal = () => {
-                modalContainer.innerHTML = '';
-                modalContainer.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('overflow-hidden');
-                modalTrigger.element?.focus();
-            };
-
-            document.querySelectorAll('[data-view-audit]').forEach((button) => {
-                button.addEventListener('click', async () => {
-                    modalTrigger.element = document.activeElement;
-                    modalContainer.innerHTML = '';
-
-                    try {
-                        const response = await fetch(button.dataset.viewAudit, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'text/html',
-                            },
-                        });
-
-                        if (!response.ok) return;
-
-                        modalContainer.innerHTML = await response.text();
-
-                        const modal = modalContainer.querySelector('[data-audit-modal]');
-                        if (!modal) {
-                            closeAuditModal();
-                            return;
-                        }
-
-                        modalContainer.setAttribute('aria-hidden', 'false');
-                        document.body.classList.add('overflow-hidden');
-
-                        const focusable = modal.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
-                        const firstFocusable = focusable[0];
-                        const lastFocusable = focusable[focusable.length - 1];
-                        firstFocusable?.focus();
-
-                        modal.addEventListener('click', (event) => {
-                            if (event.target === modal.querySelector('[data-modal-backdrop]')) {
-                                closeAuditModal();
-                            }
-                        });
-
-                        modal.addEventListener('keydown', (event) => {
-                            if (event.key === 'Escape') {
-                                closeAuditModal();
-                                return;
-                            }
-                            if (event.key === 'Tab' && focusable.length > 0) {
-                                if (event.shiftKey && document.activeElement === firstFocusable) {
-                                    event.preventDefault();
-                                    lastFocusable.focus();
-                                } else if (!event.shiftKey && document.activeElement === lastFocusable) {
-                                    event.preventDefault();
-                                    firstFocusable.focus();
-                                }
-                            }
-                        });
-
-                        modal.querySelectorAll('[data-modal-close]').forEach((element) => {
-                            element.addEventListener('click', closeAuditModal);
-                        });
-                    } catch (error) {
-                        closeAuditModal();
-                    }
-                });
-            });
         });
     </script>
 @endsection

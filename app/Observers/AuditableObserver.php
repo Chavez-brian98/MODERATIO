@@ -13,7 +13,12 @@ class AuditableObserver
 
     public function created(Model $model): void
     {
-        AuditService::log('CREATED', $model->getTable(), $model->getKey(), $this->snapshot($model));
+        AuditService::log(
+            'CREATED',
+            $model->getTable(),
+            $model->getKey(),
+            newValues: $this->snapshot($model),
+        );
     }
 
     public function updated(Model $model): void
@@ -30,15 +35,23 @@ class AuditableObserver
             $after[$key] = $this->mask($model, $key, $value);
         }
 
-        AuditService::log('UPDATED', $model->getTable(), $model->getKey(), [
-            'before' => $before,
-            'after' => $after,
-        ]);
+        AuditService::log(
+            'UPDATED',
+            $model->getTable(),
+            $model->getKey(),
+            oldValues: $before,
+            newValues: $after,
+        );
     }
 
     public function deleted(Model $model): void
     {
-        AuditService::log('DELETED', $model->getTable(), $model->getKey(), $this->snapshot($model));
+        AuditService::log(
+            'DELETED',
+            $model->getTable(),
+            $model->getKey(),
+            oldValues: $this->snapshot($model),
+        );
     }
 
     protected function snapshot(Model $model): array

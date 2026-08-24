@@ -17,11 +17,16 @@ class AuditLog extends Model
         'affected_table',
         'record_id',
         'details',
+        'old_values',
+        'new_values',
         'source_ip',
+        'created_at',
     ];
 
     protected $casts = [
         'details' => 'array',
+        'old_values' => 'array',
+        'new_values' => 'array',
         'created_at' => 'datetime',
     ];
 

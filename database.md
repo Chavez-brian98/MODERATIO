@@ -281,7 +281,9 @@ Registro inmutable de acciones realizadas en el sistema.
 | action | varchar(100) | not null | Acción realizada (ej. `create`, `update`, `delete`) |
 | affected_table | varchar(50) | not null | Tabla afectada |
 | record_id | int | — | ID del registro afectado |
-| details | JSON | — | Detalle de los cambios |
+| details | JSON | — | Detalle de eventos semánticos (login, apertura de caja, etc.) |
+| old_values | JSON | — | Valores anteriores de los campos modificados |
+| new_values | JSON | — | Valores nuevos (snapshot al crear, cambios al actualizar) |
 | source_ip | varchar(45) | — | IP de origen |
 | created_at | timestamp | default: now | Fecha del evento |
 

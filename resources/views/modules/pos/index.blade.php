@@ -3,12 +3,20 @@
 @section('title', 'POS · ' . config('app.name'))
 
 @section('content')
+    @php
+        $shiftLabels = [
+            'MORNING' => 'Mañana',
+            'AFTERNOON' => 'Tarde',
+            'NIGHT' => 'Noche',
+        ];
+    @endphp
+
     @include('partials.breadcrumbs', ['crumbs' => [
         ['label' => 'POS', 'url' => route('pos')],
         ['label' => 'Punto de Venta'],
     ]])
 
-    <div id="pos-app" class="flex h-[calc(100vh-8rem)] flex-col gap-4 lg:flex-row">
+    <div id="pos-app" class="flex flex-col gap-4 lg:h-[calc(100vh-8rem)] lg:flex-row">
         {{-- Left: Products --}}
         <div class="flex min-h-0 flex-1 flex-col">
             {{-- Search bar --}}
@@ -40,7 +48,7 @@
                     <div class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 dark:border-neutral-700 dark:bg-brand-900/30 dark:text-brand-400">
                         <i class="fa-solid fa-cash-register" aria-hidden="true"></i>
                         Caja abierta
-                        <span class="ml-1 rounded-full bg-brand-200 px-2 py-0.5 text-xs font-semibold dark:bg-brand-800">{{ $cashRegister->shift }}</span>
+                        <span class="ml-1 rounded-full bg-brand-200 px-2 py-0.5 text-xs font-semibold dark:bg-brand-800">{{ $shiftLabels[$cashRegister->shift] ?? $cashRegister->shift }}</span>
                     </div>
                 @endif
             </div>
@@ -211,8 +219,8 @@
     </div>
 
     {{-- Open Cash Register Modal --}}
-    <div id="register-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 backdrop-blur-sm" style="display:none;">
-        <div class="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
+    <div id="register-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm" style="display:none;">
+        <div class="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
             <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Abrir caja</h3>
             <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Ingresa el monto de apertura y selecciona el turno.</p>
             <form id="form-open-register" class="mt-4 space-y-3">
@@ -255,8 +263,8 @@
     </div>
 
     {{-- Sale Receipt Modal --}}
-    <div id="receipt-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 backdrop-blur-sm" style="display:none;">
-        <div class="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
+    <div id="receipt-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm" style="display:none;">
+        <div class="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
             <div class="text-center">
                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400">
                     <i class="fa-solid fa-check text-2xl" aria-hidden="true"></i>

@@ -24,8 +24,24 @@
 <body class="min-h-screen bg-brand-50 font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
 <div class="lg:grid lg:grid-cols-[17rem_1fr] sidebar-layout">
 
+    {{-- Mobile navigation: CSS-only drawer driven by #sidebar-toggle --}}
+    <input type="checkbox" id="sidebar-toggle" class="peer sr-only"/>
+    <label
+        for="sidebar-toggle"
+        title="Abrir menú"
+        aria-label="Abrir menú de navegación"
+        class="fixed right-3 top-3 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-brand-200 bg-white text-neutral-600 shadow-lg transition-colors hover:bg-brand-50 hover:text-brand-700 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/40 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 lg:hidden"
+    >
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </label>
+    <label
+        for="sidebar-toggle"
+        aria-label="Cerrar menú"
+        class="fixed inset-0 z-[55] hidden bg-neutral-900/60 backdrop-blur-sm peer-checked:block lg:hidden"
+    ></label>
+
     <!-- Sidebar -->
-    <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:flex-none lg:border-r lg:border-brand-200 lg:bg-white lg:p-4 lg:sticky lg:top-0 lg:h-screen dark:lg:border-neutral-800 dark:lg:bg-neutral-900 sidebar-sidebar relative">
+    <aside class="sidebar-sidebar fixed inset-y-0 left-0 z-[60] flex h-full max-w-[85vw] -translate-x-full flex-col overflow-y-auto border-r border-brand-200 bg-white p-4 shadow-2xl transition-transform duration-200 ease-out peer-checked:translate-x-0 dark:border-neutral-800 dark:bg-neutral-900 lg:sticky lg:top-0 lg:h-screen lg:max-w-none lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:transition-none">
 
         <!-- Botón de Toggle Redondo en el borde derecho -->
         <button
@@ -40,13 +56,21 @@
         </button>
 
         <!-- Logo -->
-        <div class="mb-6 flex justify-center sidebar-logo-full">
+        <div class="relative mb-6 flex items-center justify-center sidebar-logo-full">
             <a href="{{ route('dashboard') }}">
                 <img src="{{ asset('storage/logobg.png') }}" alt="Glenda Store" class="mx-auto h-16 w-auto max-w-full object-contain sm:h-20"/>
             </a>
             <a href="{{ route('dashboard') }}" class="hidden sidebar-logo-collapsed justify-center">
                 <img src="{{ asset('storage/logobg.png') }}" alt="Glenda Store" class="h-10 w-auto max-w-full object-contain"/>
             </a>
+            <label
+                for="sidebar-toggle"
+                title="Cerrar menú"
+                aria-label="Cerrar menú de navegación"
+                class="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-brand-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 lg:hidden"
+            >
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </label>
         </div>
 
         <nav class="flex-1 space-y-1 overflow-y-auto sidebar-nav pr-2">
@@ -200,8 +224,10 @@
         @endif
     </aside>
 
-    <main class="p-6 sm:p-10 main-content">
-        @yield('content')
+    <main class="main-content p-4 pt-16 sm:p-6 lg:p-8">
+        <div class="mx-auto w-full max-w-7xl">
+            @yield('content')
+        </div>
     </main>
 </div>
 
