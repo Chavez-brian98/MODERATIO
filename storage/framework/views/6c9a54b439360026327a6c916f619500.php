@@ -16,7 +16,7 @@
         $stats = [
             [
                 'label' => 'Categorías creadas',
-                'value' => $categories->count(),
+                'value' => $categories->total(),
                 'sub' => 'Total registradas',
                 'path' => 'M12 2.25 21 6.75l-9 4.5-9-4.5 9-4.5Zm-9 9 9 4.5 9-4.5M3.75 15.75 12 20.25l8.25-4.5',
             ],
@@ -68,18 +68,20 @@
             />
         </div>
 
-        <a
-            href="<?php echo e(route('categories.create')); ?>"
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
-        >
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Nueva categoría
-        </a>
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('categories_create')): ?>
+            <a
+                href="<?php echo e(route('categories.create')); ?>"
+                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                Nueva categoría
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -145,44 +147,48 @@
                                     </button>
                                 <?php endif; ?>
 
-                                <?php if(Route::has('categories.edit')): ?>
-                                    <a
-                                        href="<?php echo e(route('categories.edit', $category)); ?>"
-                                        title="Editar"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
-                                    </a>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('categories_edit')): ?>
+                                    <?php if(Route::has('categories.edit')): ?>
+                                        <a
+                                            href="<?php echo e(route('categories.edit', $category)); ?>"
+                                            title="Editar"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
+                                        >
+                                            <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if($category->is_active && Route::has('categories.toggle')): ?>
+                                        <form method="POST" action="<?php echo e(route('categories.toggle', $category)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('PATCH'); ?>
+                                            <button
+                                                type="submit"
+                                                data-disable-category
+                                                title="Deshabilitar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
+                                            >
+                                                <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
-                                <?php if($category->is_active && Route::has('categories.toggle')): ?>
-                                    <form method="POST" action="<?php echo e(route('categories.toggle', $category)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('PATCH'); ?>
-                                        <button
-                                            type="submit"
-                                            data-disable-category
-                                            title="Deshabilitar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
-                                        >
-                                            <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-
-                                <?php if(! $category->is_active && Route::has('categories.destroy')): ?>
-                                    <form method="POST" action="<?php echo e(route('categories.destroy', $category)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button
-                                            type="submit"
-                                            data-delete-category
-                                            title="Eliminar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
-                                        >
-                                            <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('categories_delete')): ?>
+                                    <?php if(! $category->is_active && Route::has('categories.destroy')): ?>
+                                        <form method="POST" action="<?php echo e(route('categories.destroy', $category)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
+                                            <button
+                                                type="submit"
+                                                data-delete-category
+                                                title="Eliminar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -210,6 +216,8 @@
                 </tbody>
             </table>
         </div>
+
+        <?php echo $__env->make('partials.pagination', ['paginator' => $categories], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
     <div id="category-modal-container" aria-hidden="true"></div>
@@ -362,5 +370,4 @@
         });
     </script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views/modules/categories/index.blade.php ENDPATH**/ ?>

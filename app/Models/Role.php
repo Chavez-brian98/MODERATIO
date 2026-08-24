@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends Model
 {
-    protected $fillable = ['name', 'description', 'is_active', 'is_super_admin'];
+    protected $fillable = ['name', 'description', 'is_active', 'is_super_admin', 'default_route'];
 
     protected $casts = [
         'is_active' => 'boolean',

@@ -67,14 +67,16 @@
                 class="w-full rounded-xl border border-brand-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder:text-neutral-500"
             />
         </div>
-        <a href="{{ route('cash-register.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
-            <i class="fa-solid fa-plus text-xs"></i> Abrir Caja
-        </a>
+        @can('cash_registers_create')
+            <a href="{{ route('cash-register.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
+                <i class="fa-solid fa-plus text-xs"></i> Abrir Caja
+            </a>
+        @endcan
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-sm" role="grid">
                 <thead>
                     <tr class="border-b border-brand-100 bg-brand-50/60 dark:border-neutral-700 dark:bg-neutral-800/60">
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">ID</th>
@@ -131,6 +133,8 @@
                 </tbody>
             </table>
         </div>
+
+        @include('partials.pagination', ['paginator' => $registers])
     </div>
 @endsection
 

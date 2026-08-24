@@ -67,20 +67,22 @@
                 class="w-full rounded-xl border border-brand-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder:text-neutral-500"
             />
         </div>
-        <a href="{{ route('inventory.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
-            <i class="fa-solid fa-plus text-xs"></i> Nuevo Producto
-        </a>
+        @can('products_create')
+            <a href="{{ route('inventory.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
+                <i class="fa-solid fa-plus text-xs"></i> Nuevo Producto
+            </a>
+        @endcan
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-sm" role="grid">
                 <thead>
                     <tr class="border-b border-brand-100 bg-brand-50/60 dark:border-neutral-700 dark:bg-neutral-800/60">
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Producto</th>
                         <th class="hidden px-4 py-3 font-semibold text-brand-800 sm:table-cell dark:text-brand-200">Código</th>
                         <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Categoría</th>
-                        <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Precio Compra</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 lg:table-cell dark:text-brand-200">Precio Compra</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Precio Venta</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Stock</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Estado</th>
@@ -98,7 +100,7 @@
                             </td>
                             <td class="hidden px-4 py-3 sm:table-cell font-mono text-xs dark:text-neutral-400">{{ $product->barcode ?? '—' }}</td>
                             <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300">{{ $product->category->name }}</td>
-                            <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300">${{ number_format($product->purchase_price, 2) }}</td>
+                            <td class="hidden px-4 py-3 lg:table-cell dark:text-neutral-300">${{ number_format($product->purchase_price, 2) }}</td>
                             <td class="px-4 py-3 font-semibold text-neutral-800 dark:text-neutral-100">${{ number_format($product->sale_price, 2) }}</td>
                             <td class="px-4 py-3">
                                 @if ($product->current_stock <= 0)
@@ -132,30 +134,36 @@
                                         <i class="fa-solid fa-eye text-xs"></i>
                                     </a>
                                     @if ($product->is_active)
-                                        <a href="{{ route('inventory.edit', $product) }}" class="inline-flex items-center justify-center rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-neutral-800" title="Editar">
-                                            <i class="fa-solid fa-pen text-xs"></i>
-                                        </a>
-                                        <form method="POST" action="{{ route('inventory.toggle', $product) }}" class="inline">
-                                            @csrf @method('PATCH')
-                                            <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-neutral-800" title="Desactivar"
-                                                onclick="return confirm('¿Desactivar este producto?')">
-                                                <i class="fa-solid fa-ban text-xs"></i>
-                                            </button>
-                                        </form>
+                                        @can('products_edit')
+                                            <a href="{{ route('inventory.edit', $product) }}" class="inline-flex items-center justify-center rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-neutral-800" title="Editar">
+                                                <i class="fa-solid fa-pen text-xs"></i>
+                                            </a>
+                                            <form method="POST" action="{{ route('inventory.toggle', $product) }}" class="inline">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-neutral-800" title="Desactivar"
+                                                    onclick="return confirm('¿Desactivar este producto?')">
+                                                    <i class="fa-solid fa-ban text-xs"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
                                     @else
-                                        <form method="POST" action="{{ route('inventory.toggle', $product) }}" class="inline">
-                                            @csrf @method('PATCH')
-                                            <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-neutral-800" title="Reactivar">
-                                                <i class="fa-solid fa-check text-xs"></i>
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="{{ route('inventory.destroy', $product) }}" class="inline">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-neutral-800" title="Eliminar"
-                                                onclick="return confirm('¿Eliminar este producto permanentemente?')">
-                                                <i class="fa-solid fa-trash text-xs"></i>
-                                            </button>
-                                        </form>
+                                        @can('products_edit')
+                                            <form method="POST" action="{{ route('inventory.toggle', $product) }}" class="inline">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-neutral-800" title="Reactivar">
+                                                    <i class="fa-solid fa-check text-xs"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
+                                        @can('products_delete')
+                                            <form method="POST" action="{{ route('inventory.destroy', $product) }}" class="inline">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-neutral-800" title="Eliminar"
+                                                    onclick="return confirm('¿Eliminar este producto permanentemente?')">
+                                                    <i class="fa-solid fa-trash text-xs"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
                                     @endif
                                 </div>
                             </td>
@@ -178,6 +186,8 @@
                 </tbody>
             </table>
         </div>
+
+        @include('partials.pagination', ['paginator' => $products])
     </div>
 @endsection
 

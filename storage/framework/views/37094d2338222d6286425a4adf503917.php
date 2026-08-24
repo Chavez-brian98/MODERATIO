@@ -39,37 +39,6 @@
             'settings' => 'Configuración',
             'user_has_permissions' => 'Permisos de usuario',
         ];
-
-        $todayCount = $logs->filter(fn ($log) => $log->created_at->isToday())->count();
-        $mostActiveUser = $logs->where('user_id', '!=', null)->pluck('user')->filter()->groupBy('full_name')->sortByDesc(fn ($group) => $group->count())->keys()->first() ?? '—';
-        $mostAffectedTable = $logs->groupBy('affected_table')->sortByDesc(fn ($group) => $group->count())->keys()->first() ?? '—';
-
-        $stats = [
-            [
-                'label' => 'Total de registros',
-                'value' => $logs->count(),
-                'sub' => 'En la bitácora',
-                'path' => 'M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z',
-            ],
-            [
-                'label' => 'Registros hoy',
-                'value' => $todayCount,
-                'sub' => now()->isoFormat('D MMMM YYYY'),
-                'path' => 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
-            ],
-            [
-                'label' => 'Usuario más activo',
-                'value' => $mostActiveUser,
-                'sub' => 'Mayor cantidad de acciones',
-                'path' => 'M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z',
-            ],
-            [
-                'label' => 'Tabla más afectada',
-                'value' => $tableLabels[$mostAffectedTable] ?? $mostAffectedTable,
-                'sub' => 'Más registros modificados',
-                'path' => 'M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z',
-            ],
-        ];
     ?>
 
     <?php echo $__env->make('partials.breadcrumbs', ['crumbs' => [
@@ -82,25 +51,6 @@
             <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Registro de actividades y cambios realizados en el sistema.</p>
         </div>
     </header>
-
-    <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <?php $__currentLoopData = $stats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <div class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="<?php echo e($stat['path']); ?>" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="truncate text-sm text-neutral-500 dark:text-neutral-400"><?php echo e($stat['label']); ?></p>
-                        <p class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white sm:text-2xl"><?php echo e($stat['value']); ?></p>
-                        <p class="text-xs text-neutral-400 dark:text-neutral-500"><?php echo e($stat['sub']); ?></p>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </section>
 
     <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="relative w-full sm:max-w-sm">
@@ -144,7 +94,7 @@
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -231,6 +181,8 @@
                 </tbody>
             </table>
         </div>
+
+        <?php echo $__env->make('partials.pagination', ['paginator' => $logs], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
     <div id="audit-modal-container" aria-hidden="true"></div>
@@ -346,5 +298,4 @@
         });
     </script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views/modules/audit/index.blade.php ENDPATH**/ ?>

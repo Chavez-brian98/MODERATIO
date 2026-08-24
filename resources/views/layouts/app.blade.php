@@ -22,53 +22,62 @@
     </script>
 </head>
 <body class="min-h-screen bg-brand-50 font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
-<div class="group lg:grid lg:grid-cols-[17rem_1fr] transition-[grid-template-columns] duration-300 lg:has-checked:grid-cols-[4.5rem_1fr]">
+<div class="group sidebar-group lg:grid lg:grid-cols-[4.5rem_1fr] transition-[grid-template-columns] duration-300 desktop-sidebar-collapsed">
 
+    <!-- Mobile hamburger button (outside sidebar, fixed) -->
     <button
         type="button"
         data-sidebar-toggle
-        title="Menu"
+        title="Menú"
         aria-label="Abrir o cerrar menú"
-        class="fixed left-0 top-12 z-[60] flex -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-brand-200 bg-white p-2.5 text-neutral-500 shadow-md transition-all duration-300 hover:bg-brand-100 hover:text-brand-800 group-has-checked:left-[min(85vw,18rem)] group-has-checked:translate-x-1/2 lg:hidden dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+        class="fixed left-4 top-4 z-[60] flex cursor-pointer items-center justify-center rounded-full border border-brand-200 bg-white p-2.5 text-neutral-500 shadow-md transition-all duration-300 hover:bg-brand-100 hover:text-brand-800 lg:hidden dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+        style="left: 1rem; top: 1rem;"
     >
-        <svg class="h-4 w-4 group-has-checked:hidden" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg class="h-5 w-5 sidebar-hamburger-open" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" class="stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <svg class="hidden h-4 w-4 group-has-checked:block" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg class="hidden h-5 w-5 sidebar-hamburger-close" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M6 18 18 6M6 6l12 12" class="stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
     </button>
 
-    <label for="sidebar-toggle" aria-hidden="true" class="pointer-events-none fixed inset-0 z-40 cursor-default bg-neutral-900/40 opacity-0 transition-opacity duration-300 group-has-checked:pointer-events-auto group-has-checked:opacity-100 lg:hidden"></label>
+    <!-- Mobile backdrop -->
+    <label for="sidebar-toggle" aria-hidden="true" class="mobile-backdrop pointer-events-none fixed inset-0 z-40 cursor-default bg-neutral-900/40 opacity-0 transition-opacity duration-300 lg:hidden"></label>
 
-    <aside class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] -translate-x-full flex-col overflow-y-auto border-r border-brand-200 bg-white p-4 shadow-xl transition-transform duration-300 group-has-checked:translate-x-0 lg:bottom-auto lg:left-auto lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:sticky lg:top-0 lg:h-screen lg:p-5 lg:group-has-checked:min-w-0 dark:border-neutral-800 dark:bg-neutral-900">
+    <!-- Sidebar -->
+    <aside class="mobile-drawer fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] -translate-x-full flex-col overflow-y-auto border-r border-brand-200 bg-white p-4 shadow-xl transition-transform duration-300 lg:bottom-auto lg:left-auto lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:sticky lg:top-0 lg:h-screen lg:p-5 dark:border-neutral-800 dark:bg-neutral-900">
         <input type="checkbox" id="sidebar-toggle" autocomplete="off" class="sr-only"/>
 
-        <div class="flex justify-center px-2">
-            <a href="{{ route('dashboard') }}" class="block lg:group-has-checked:hidden">
-                <img src="{{ asset('storage/logobg.png') }}" alt="Glenda Store" class="mx-auto h-16 w-auto max-w-full object-contain sm:h-20 lg:h-24"/>
+        <!-- Logo -->
+        <div class="flex justify-center px-2 mb-6">
+            <a href="{{ route('dashboard') }}" class="block sidebar-logo-full">
+                <img src="{{ asset('storage/logobg.png') }}" alt="Glenda Store" class="mx-auto h-16 w-auto max-w-full object-contain sm:h-20"/>
+            </a>
+            <a href="{{ route('dashboard') }}" class="hidden sidebar-logo-collapsed justify-center">
+                <img src="{{ asset('storage/logobg.png') }}" alt="Glenda Store" class="h-10 w-auto max-w-full object-contain"/>
             </a>
         </div>
 
+        <!-- Desktop collapse/expand button (inside sidebar, top right) -->
         <button
             type="button"
             data-sidebar-toggle
             title="Colapsar o expandir sidebar"
             aria-label="Colapsar o expandir sidebar"
-            class="absolute right-0 top-12 z-20 hidden translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-brand-200 bg-white p-2.5 text-neutral-500 shadow-md transition-colors hover:bg-brand-100 hover:text-brand-800 lg:flex dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+            class="absolute right-0 top-4 z-20 -translate-x-1/2 translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border border-brand-200 bg-white p-2 text-neutral-500 shadow-md transition-all duration-300 hover:bg-brand-100 hover:text-brand-800 lg:flex dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
         >
-            <svg class="h-4 w-4 transition-transform duration-300 lg:group-has-checked:rotate-180" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <svg class="h-5 w-5 transition-transform duration-300 sidebar-collapse-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" class="stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
 
-        <nav class="mt-2 flex-1 space-y-1 lg:overflow-x-hidden lg:overflow-y-auto lg:group-has-checked:overflow-hidden">
+        <nav class="mt-2 flex-1 space-y-1 lg:overflow-x-hidden lg:overflow-y-auto sidebar-nav">
             @php
                 $sections = [
                     [
                         'title' => 'General',
                         'items' => [
-                            ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'fa fa-line-chart', 'permission' => null],
+                            ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'fa fa-line-chart', 'permission' => 'dashboard_view'],
                         ],
                     ],
                     [
@@ -122,21 +131,21 @@
                 @endphp
 
                 @if ($visibleItems->isNotEmpty())
-                    <p class="mt-5 px-2 text-xs font-semibold uppercase tracking-wider text-brand-500 lg:group-has-checked:hidden dark:text-brand-400">{{ $section['title'] }}</p>
+                    <p class="mt-5 px-2 text-xs font-semibold uppercase tracking-wider text-brand-500 sidebar-section-title dark:text-brand-400">{{ $section['title'] }}</p>
                     <div class="mt-1.5 space-y-1">
                         @foreach ($visibleItems as $module)
                             <a
                                 href="{{ route($module['route']) }}"
-                                class="{{ request()->routeIs($module['route'], $module['route'].'.*') ? 'bg-brand-100 text-brand-800 dark:bg-brand-900/40 dark:text-brand-300' : 'text-neutral-600 hover:bg-brand-100 hover:text-brand-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white' }} flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors lg:group-has-checked:justify-center lg:group-has-checked:px-0"
+                                class="{{ request()->routeIs($module['route'], $module['route'].'.*') ? 'bg-brand-100 text-brand-800 dark:bg-brand-900/40 dark:text-brand-300' : 'text-neutral-600 hover:bg-brand-100 hover:text-brand-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white' }} flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors sidebar-nav-item"
                             >
                                 @if (! empty($module['icon']))
                                     <i class="{{ $module['icon'] }}" aria-hidden="true"></i>
                                 @else
-                                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <svg class="h-5 w-5 shrink-0 sidebar-nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path d="{{ $module['path'] }}" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 @endif
-                                <span class="lg:group-has-checked:hidden">{{ $module['label'] }}</span>
+                                <span class="sidebar-nav-label">{{ $module['label'] }}</span>
                             </a>
                         @endforeach
                     </div>
@@ -144,15 +153,15 @@
             @endforeach
         </nav>
 
-{{--         Dark mode toggle--}}
+        {{-- Dark mode toggle --}}
         <div class="mt-4 border-t border-brand-100 pt-4 dark:border-neutral-800">
             <button
                 type="button"
                 id="theme-toggle"
-                class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-brand-100 hover:text-brand-800 lg:group-has-checked:justify-center lg:group-has-checked:px-0 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-brand-100 hover:text-brand-800 sidebar-theme-toggle dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
             >
                 <i class="fa-solid fa-circle-half-stroke h-5 w-5 shrink-0 text-center" aria-hidden="true"></i>
-                <span class="lg:group-has-checked:hidden" id="theme-label">Modo oscuro</span>
+                <span class="sidebar-theme-label" id="theme-label">Modo oscuro</span>
             </button>
         </div>
 
@@ -164,7 +173,7 @@
                     aria-haspopup="menu"
                     aria-expanded="false"
                     title="{{ auth()->user()->full_name }}"
-                    class="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-brand-100 lg:group-has-checked:justify-center lg:group-has-checked:px-0 dark:hover:bg-neutral-800"
+                    class="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-brand-100 sidebar-user-menu dark:hover:bg-neutral-800"
                 >
                     @if (auth()->user()->photoUrl())
                         <img
@@ -177,11 +186,11 @@
                             {{ auth()->user()->initials() }}
                         </span>
                     @endif
-                    <div class="min-w-0 flex-1 lg:group-has-checked:hidden">
+                    <div class="min-w-0 flex-1 sidebar-user-info">
                         <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">{{ auth()->user()->full_name }}</p>
                         <p class="truncate text-xs text-neutral-400 dark:text-neutral-500">{{ auth()->user()->email }}</p>
                     </div>
-                    <i class="fa-solid fa-chevron-up h-4 w-4 shrink-0 text-center text-neutral-400 lg:group-has-checked:hidden" aria-hidden="true"></i>
+                    <i class="fa-solid fa-chevron-up h-4 w-4 shrink-0 text-center text-neutral-400 sidebar-user-chevron" aria-hidden="true"></i>
                 </button>
 
                 <div
@@ -213,7 +222,7 @@
         @endif
     </aside>
 
-    <main class="p-6 sm:p-10">
+    <main class="p-6 sm:p-10 lg:pl-4 lg:pr-10 lg:pt-6 lg:pb-10">
         @yield('content')
     </main>
 </div>
@@ -222,23 +231,94 @@
 <script>
     (() => {
         const sidebarToggle = document.getElementById('sidebar-toggle');
+        const html = document.documentElement;
 
-        const expand = () => {
+        // Initialize from localStorage
+        const savedSidebar = localStorage.getItem('sidebar-collapsed');
+        if (savedSidebar === 'true') {
+            sidebarToggle.checked = true;
+            html.classList.add('sidebar-collapsed');
+        } else {
             sidebarToggle.checked = false;
-            requestAnimationFrame(() => {
-                sidebarToggle.checked = false;
-            });
+            html.classList.remove('sidebar-collapsed');
+        }
+
+        const toggleSidebar = (force) => {
+            if (typeof force === 'boolean') {
+                sidebarToggle.checked = force;
+            } else {
+                sidebarToggle.checked = !sidebarToggle.checked;
+            }
+            html.classList.toggle('sidebar-collapsed', sidebarToggle.checked);
+            localStorage.setItem('sidebar-collapsed', sidebarToggle.checked);
         };
 
+        const closeMobileDrawer = () => {
+            if (window.innerWidth < 1024) {
+                sidebarToggle.checked = false;
+                html.classList.remove('sidebar-collapsed');
+                localStorage.setItem('sidebar-collapsed', 'false');
+            }
+        };
+
+        // Toggle buttons
         document.querySelectorAll('[data-sidebar-toggle]').forEach((toggle) => {
             toggle.addEventListener('click', (event) => {
                 event.preventDefault();
-                sidebarToggle.checked = !sidebarToggle.checked;
+                toggleSidebar();
             });
         });
 
-        window.addEventListener('pageshow', expand);
-        expand();
+        // Close mobile drawer when clicking nav link on mobile
+        document.querySelectorAll('nav a[href]').forEach((link) => {
+            link.addEventListener('click', closeMobileDrawer);
+        });
+
+        // Close mobile drawer when clicking backdrop
+        document.querySelector('.mobile-backdrop')?.addEventListener('click', closeMobileDrawer);
+
+        // Desktop hover to expand collapsed sidebar
+        const sidebar = document.querySelector('aside');
+        let hoverTimeout;
+
+        sidebar?.addEventListener('mouseenter', () => {
+            if (window.innerWidth >= 1024 && sidebarToggle.checked) {
+                clearTimeout(hoverTimeout);
+                sidebarToggle.checked = false;
+                html.classList.remove('sidebar-collapsed');
+                localStorage.setItem('sidebar-collapsed', 'false');
+            }
+        });
+
+        sidebar?.addEventListener('mouseleave', () => {
+            if (window.innerWidth >= 1024 && !sidebarToggle.checked) {
+                hoverTimeout = setTimeout(() => {
+                    sidebarToggle.checked = true;
+                    html.classList.add('sidebar-collapsed');
+                    localStorage.setItem('sidebar-collapsed', 'true');
+                }, 300);
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                // On desktop, ensure mobile drawer is closed
+                document.querySelector('.mobile-backdrop')?.classList.remove('opacity-100', 'pointer-events-auto');
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('pageshow', () => {
+            const saved = localStorage.getItem('sidebar-collapsed');
+            if (saved === 'true') {
+                sidebarToggle.checked = true;
+                html.classList.add('sidebar-collapsed');
+            } else {
+                sidebarToggle.checked = false;
+                html.classList.remove('sidebar-collapsed');
+            }
+        });
     })();
 </script>
 <script>

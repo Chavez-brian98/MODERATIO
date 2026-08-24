@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/perfil/foto', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
     Route::delete('/perfil/foto', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
 
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard')->middleware('permission:dashboard_view');
 
     // POS
     Route::middleware('permission:sales_view')->group(function () {

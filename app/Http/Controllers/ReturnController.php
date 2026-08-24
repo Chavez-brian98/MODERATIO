@@ -12,18 +12,21 @@ use Illuminate\View\View;
 
 class ReturnController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $returns = ProductReturn::query()
             ->with(['sale', 'user', 'details.product'])
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $stats = [
-            'total_returns' => $returns->count(),
-            'total_refunded' => $returns->sum('total_returned'),
-            'today_returns' => $returns->filter(fn ($r) => $r->created_at->isToday())->count(),
-            'today_refunded' => $returns->filter(fn ($r) => $r->created_at->isToday())->sum('total_returned'),
+            'total_returns' => ProductReturn::count(),
+            'total_refunded' => ProductReturn::sum('total_returned'),
+            'today_returns' => ProductReturn::whereDate('created_at', today())->count(),
+            'today_refunded' => ProductReturn::whereDate('created_at', today())->sum('total_returned'),
         ];
 
         return view('modules.returns.index', [

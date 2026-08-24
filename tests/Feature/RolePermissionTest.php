@@ -35,9 +35,9 @@ class RolePermissionTest extends TestCase
     {
         $this->seedPermissions();
 
-        $this->assertSame(11, Resource::count());
+        $this->assertSame(12, Resource::count());
         $this->assertSame(4, Action::count());
-        $this->assertSame(44, Permission::count());
+        $this->assertSame(48, Permission::count());
     }
 
     public function test_administrator_gets_all_permissions_and_super_admin_flag(): void
@@ -45,7 +45,7 @@ class RolePermissionTest extends TestCase
         $role = $this->seedPermissions();
 
         $this->assertTrue($role->is_super_admin);
-        $this->assertSame(44, $role->permissions()->count());
+        $this->assertSame(48, $role->permissions()->count());
     }
 
     public function test_permissions_can_be_synced_to_a_role(): void
@@ -100,7 +100,7 @@ class RolePermissionTest extends TestCase
             'is_super_admin' => '1',
         ], ['HTTP_ACCEPT' => 'application/json'])->assertOk();
 
-        $this->assertSame(44, $role->fresh()->permissions()->count());
+        $this->assertSame(48, $role->fresh()->permissions()->count());
         $this->assertTrue($role->fresh()->is_super_admin);
     }
 

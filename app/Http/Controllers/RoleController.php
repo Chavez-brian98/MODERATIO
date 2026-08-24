@@ -15,13 +15,16 @@ use Illuminate\View\View;
 
 class RoleController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $roles = Role::query()
             ->withCount('users')
             ->withCount('permissions')
             ->orderBy('name')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('modules.roles.index', ['roles' => $roles]);
     }
@@ -37,6 +40,7 @@ class RoleController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:roles,name'],
             'description' => ['nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
+            'default_route' => ['nullable', 'string', 'max:100'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
@@ -64,6 +68,7 @@ class RoleController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:roles,name,'.$role->id],
             'description' => ['nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
+            'default_route' => ['nullable', 'string', 'max:100'],
         ]);
 
         $role->fill($validated);

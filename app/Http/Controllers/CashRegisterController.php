@@ -15,14 +15,17 @@ class CashRegisterController extends Controller
         private readonly CashRegisterService $service,
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $registers = CashRegister::query()
             ->with('user')
             ->withCount(['sales' => fn ($q) => $q->notCancelled()])
             ->withSum(['sales' => fn ($q) => $q->notCancelled()], 'total')
             ->orderByDesc('opening_date')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $stats = $this->service->getStats();
 

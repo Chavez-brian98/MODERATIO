@@ -15,7 +15,7 @@
         $stats = [
             [
                 'label' => 'Empleados registrados',
-                'value' => $employees->count(),
+                'value' => $employees->total(),
                 'sub' => 'Total en el sistema',
                 'path' => 'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z',
             ],
@@ -78,18 +78,20 @@
             />
         </div>
 
-        <a
-            href="<?php echo e(route('employees.create')); ?>"
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
-        >
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Nuevo empleado
-        </a>
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('users_create')): ?>
+            <a
+                href="<?php echo e(route('employees.create')); ?>"
+                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                Nuevo empleado
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -169,55 +171,59 @@
                                     </button>
                                 <?php endif; ?>
 
-                                <?php if(Route::has('employees.edit')): ?>
-                                    <a
-                                        href="<?php echo e(route('employees.edit', $employee)); ?>"
-                                        title="Editar"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
-                                    </a>
-                                <?php endif; ?>
-
-                                <?php if($employee->is_active && Route::has('employees.permissions')): ?>
-                                    <button
-                                        type="button"
-                                        title="Permisos"
-                                        data-permissions-user="<?php echo e(route('employees.permissions', $employee)); ?>"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
-                                    >
-                                        <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
-                                    </button>
-                                <?php endif; ?>
-
-                                <?php if($employee->is_active && Route::has('employees.toggle')): ?>
-                                    <form method="POST" action="<?php echo e(route('employees.toggle', $employee)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('PATCH'); ?>
-                                        <button
-                                            type="submit"
-                                            data-disable-employee
-                                            title="Deshabilitar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('users_edit')): ?>
+                                    <?php if(Route::has('employees.edit')): ?>
+                                        <a
+                                            href="<?php echo e(route('employees.edit', $employee)); ?>"
+                                            title="Editar"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
                                         >
-                                            <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if($employee->is_active && Route::has('employees.permissions')): ?>
+                                        <button
+                                            type="button"
+                                            title="Permisos"
+                                            data-permissions-user="<?php echo e(route('employees.permissions', $employee)); ?>"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
+                                        >
+                                            <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
                                         </button>
-                                    </form>
+                                    <?php endif; ?>
+
+                                    <?php if($employee->is_active && Route::has('employees.toggle')): ?>
+                                        <form method="POST" action="<?php echo e(route('employees.toggle', $employee)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('PATCH'); ?>
+                                            <button
+                                                type="submit"
+                                                data-disable-employee
+                                                title="Deshabilitar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
+                                            >
+                                                <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
-                                <?php if(! $employee->is_active && Route::has('employees.destroy')): ?>
-                                    <form method="POST" action="<?php echo e(route('employees.destroy', $employee)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button
-                                            type="submit"
-                                            data-delete-employee
-                                            title="Eliminar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
-                                        >
-                                            <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('users_delete')): ?>
+                                    <?php if(! $employee->is_active && Route::has('employees.destroy')): ?>
+                                        <form method="POST" action="<?php echo e(route('employees.destroy', $employee)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
+                                            <button
+                                                type="submit"
+                                                data-delete-employee
+                                                title="Eliminar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -245,6 +251,8 @@
                 </tbody>
             </table>
         </div>
+
+        <?php echo $__env->make('partials.pagination', ['paginator' => $employees], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
     <div id="employee-modal-container" aria-hidden="true"></div>
@@ -397,5 +405,4 @@
         });
     </script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views/modules/employees/index.blade.php ENDPATH**/ ?>

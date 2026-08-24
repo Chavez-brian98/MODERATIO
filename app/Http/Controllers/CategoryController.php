@@ -11,12 +11,16 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $categories = Category::query()
             ->with('parent')
             ->withCount(['products', 'children'])
-            ->get();
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('modules.categories.index', ['categories' => $categories]);
     }

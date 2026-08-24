@@ -16,13 +16,16 @@ use Illuminate\View\View;
 
 class EmployeeController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $employees = User::query()
             ->with('roles')
             ->withCount('permissions')
             ->orderBy('full_name')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('modules.employees.index', ['employees' => $employees]);
     }

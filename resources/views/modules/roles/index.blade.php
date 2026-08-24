@@ -7,7 +7,7 @@
         $stats = [
             [
                 'label' => 'Roles definidos',
-                'value' => $roles->count(),
+                'value' => $roles->total(),
                 'sub' => 'Total en el sistema',
                 'path' => 'M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z',
             ],
@@ -70,18 +70,20 @@
             />
         </div>
 
-        <a
-            href="{{ route('roles.create') }}"
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
-        >
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Nuevo rol
-        </a>
+        @can('roles_create')
+            <a
+                href="{{ route('roles.create') }}"
+                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                Nuevo rol
+            </a>
+        @endcan
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -151,56 +153,60 @@
                                     </button>
                                 @endif
 
-                                @if ($role->is_active && Route::has('roles.permissions'))
-                                    <button
-                                        type="button"
-                                        title="Permisos"
-                                        data-permissions-role="{{ route('roles.permissions', $role) }}"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
-                                    >
-                                        <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
-                                    </button>
-                                @endif
-
-                                @if (Route::has('roles.edit'))
-                                    <a
-                                        href="{{ route('roles.edit', $role) }}"
-                                        title="Editar"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
-                                    </a>
-                                @endif
-
-                                @if ($role->is_active && Route::has('roles.toggle'))
-                                    <form method="POST" action="{{ route('roles.toggle', $role) }}">
-                                        @csrf
-                                        @method('PATCH')
+                                @can('roles_edit')
+                                    @if ($role->is_active && Route::has('roles.permissions'))
                                         <button
-                                            type="submit"
-                                            data-disable-role
-                                            title="Deshabilitar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
+                                            type="button"
+                                            title="Permisos"
+                                            data-permissions-role="{{ route('roles.permissions', $role) }}"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
                                         >
-                                            <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
                                         </button>
-                                    </form>
-                                @endif
+                                    @endif
 
-                                @if (! $role->is_active && Route::has('roles.destroy'))
-                                    <form method="POST" action="{{ route('roles.destroy', $role) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            data-delete-role
-                                            title="Eliminar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                    @if (Route::has('roles.edit'))
+                                        <a
+                                            href="{{ route('roles.edit', $role) }}"
+                                            title="Editar"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
                                         >
-                                            <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                @endif
+                                            <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
+                                        </a>
+                                    @endif
+
+                                    @if ($role->is_active && Route::has('roles.toggle'))
+                                        <form method="POST" action="{{ route('roles.toggle', $role) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button
+                                                type="submit"
+                                                data-disable-role
+                                                title="Deshabilitar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
+                                            >
+                                                <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endcan
+
+                                @can('roles_delete')
+                                    @if (! $role->is_active && Route::has('roles.destroy'))
+                                        <form method="POST" action="{{ route('roles.destroy', $role) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button
+                                                type="submit"
+                                                data-delete-role
+                                                title="Eliminar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -227,6 +233,8 @@
                 </tbody>
             </table>
         </div>
+
+        @include('partials.pagination', ['paginator' => $roles])
     </div>
 
     <div id="role-modal-container" aria-hidden="true"></div>
@@ -376,7 +384,6 @@
                     }
                 });
             });
-
         });
     </script>
 @endsection

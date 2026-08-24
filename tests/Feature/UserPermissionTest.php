@@ -140,7 +140,7 @@ class UserPermissionTest extends TestCase
         $randomPermission = Permission::query()->where('name', 'audit_log_delete')->value('id');
 
         $this->assertTrue($user->hasEffectivePermission($randomPermission));
-        $this->assertSame(44, count($user->effectivePermissionIds()));
+        $this->assertSame(48, count($user->effectivePermissionIds()));
     }
 
     public function test_sync_writes_audit_entry(): void

@@ -11,6 +11,7 @@ use Illuminate\Database\Seeder;
 class PermissionSeeder extends Seeder
 {
     private array $resources = [
+        ['name' => 'dashboard', 'display_name' => 'Dashboard'],
         ['name' => 'users', 'display_name' => 'Empleados'],
         ['name' => 'roles', 'display_name' => 'Roles y Permisos'],
         ['name' => 'categories', 'display_name' => 'Categorías'],
@@ -64,7 +65,17 @@ class PermissionSeeder extends Seeder
 
         if ($administrator) {
             $administrator->permissions()->sync($allPermissionIds);
-            $administrator->update(['is_super_admin' => true]);
+            $administrator->update(['is_super_admin' => true, 'default_route' => 'dashboard']);
+        }
+
+        $cashier = Role::where('name', 'CASHIER')->first();
+        if ($cashier) {
+            $cashier->update(['default_route' => 'pos']);
+        }
+
+        $warehouse = Role::where('name', 'WAREHOUSE')->first();
+        if ($warehouse) {
+            $warehouse->update(['default_route' => 'inventory.index']);
         }
     }
 }
