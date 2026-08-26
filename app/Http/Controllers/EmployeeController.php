@@ -44,6 +44,7 @@ class EmployeeController extends Controller
             'email' => ['required', 'string', 'max:50', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'role_id' => ['required', 'exists:roles,id'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
             'DUI' => ['nullable', 'string', 'max:10', 'unique:users,DUI'],
             'birthday' => ['nullable', 'date', 'before:today'],
@@ -56,7 +57,8 @@ class EmployeeController extends Controller
         $user = User::create($validated + ['is_active' => $request->boolean('is_active')]);
         $user->roles()->sync($roleId);
 
-        return redirect()->route('employees.index');
+        return redirect()->route('employees.index')
+            ->with('success', 'Empleado creado correctamente.');
     }
 
     public function show(User $employee): View
@@ -81,6 +83,7 @@ class EmployeeController extends Controller
             'email' => ['required', 'string', 'max:50', 'email', 'unique:users,email,'.$employee->id],
             'password' => ['nullable', 'string', 'min:8'],
             'role_id' => ['required', 'exists:roles,id'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
             'DUI' => ['nullable', 'string', 'max:10', 'unique:users,DUI,'.$employee->id],
             'birthday' => ['nullable', 'date', 'before:today'],
@@ -99,7 +102,8 @@ class EmployeeController extends Controller
         $employee->save();
         $employee->roles()->sync($roleId);
 
-        return redirect()->route('employees.index');
+        return redirect()->route('employees.index')
+            ->with('success', 'Empleado actualizado correctamente.');
     }
 
     public function toggleActive(User $employee): RedirectResponse
@@ -112,14 +116,16 @@ class EmployeeController extends Controller
             'is_active' => $employee->is_active,
         ]);
 
-        return redirect()->route('employees.index');
+        return redirect()->route('employees.index')
+            ->with('success', $employee->is_active ? 'Empleado activado correctamente.' : 'Empleado deshabilitado correctamente.');
     }
 
     public function destroy(User $employee): RedirectResponse
     {
         $employee->delete();
 
-        return redirect()->route('employees.index');
+        return redirect()->route('employees.index')
+            ->with('success', 'Empleado eliminado correctamente.');
     }
 
     public function permissions(User $employee): View

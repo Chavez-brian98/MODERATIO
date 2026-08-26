@@ -20,7 +20,7 @@ class EmployeeTest extends TestCase
 
     private function role(): Role
     {
-        return Role::create(['name' => 'CASHIER', 'description' => 'Can operate the POS']);
+        return Role::firstOrCreate(['name' => 'CASHIER'], ['description' => 'Can operate the POS']);
     }
 
     public function test_employee_can_be_created(): void

@@ -54,66 +54,25 @@
         </div>
     </header>
 
-    <form
-        method="GET"
-        action="{{ route('audit.index') }}"
-        class="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-brand-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
-    >
-        <div>
-            <label for="date_from" class="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">Desde</label>
-            <input
-                type="date"
-                id="date_from"
-                name="date_from"
-                value="{{ $filters['date_from'] }}"
-                max="{{ $filters['date_to'] }}"
-                class="rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
-            />
-        </div>
-        <div>
-            <label for="date_to" class="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">Hasta</label>
-            <input
-                type="date"
-                id="date_to"
-                name="date_to"
-                value="{{ $filters['date_to'] }}"
-                min="{{ $filters['date_from'] }}"
-                class="rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
-            />
-        </div>
-        <button
-            type="submit"
-            class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
-        >
-            <i class="fa-solid fa-filter text-xs" aria-hidden="true"></i>
-            Filtrar
-        </button>
-        <a
-            href="{{ route('audit.index') }}"
-            class="text-sm text-neutral-500 transition-colors hover:text-brand-700 dark:text-neutral-400 dark:hover:text-brand-400"
-        >
-            Limpiar
-        </a>
-    </form>
+    <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="audit-search"
+                    placeholder="Buscar en la bitácora..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative w-full sm:max-w-sm">
-            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input
-                type="search"
-                id="audit-search"
-                placeholder="Buscar en la bitácora..."
-                autocomplete="off"
-                class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
-            />
-        </div>
-
-        <div class="flex flex-wrap gap-2">
             <select
                 id="audit-filter-action"
-                class="rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                aria-label="Filtrar por acción"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             >
                 <option value="">Todas las acciones</option>
                 <option value="CREATED">Creación</option>
@@ -126,7 +85,8 @@
 
             <select
                 id="audit-filter-table"
-                class="rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                aria-label="Filtrar por tabla"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             >
                 <option value="">Todas las tablas</option>
                 @foreach ($logs->pluck('affected_table')->unique()->sort() as $table)
@@ -134,6 +94,45 @@
                 @endforeach
             </select>
         </div>
+
+        <form
+            method="GET"
+            action="{{ route('audit.index') }}"
+            class="flex flex-col gap-3 sm:flex-row sm:items-center"
+        >
+            <input
+                type="date"
+                id="date_from"
+                name="date_from"
+                value="{{ $filters['date_from'] }}"
+                max="{{ $filters['date_to'] }}"
+                aria-label="Fecha desde"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            />
+            <input
+                type="date"
+                id="date_to"
+                name="date_to"
+                value="{{ $filters['date_to'] }}"
+                min="{{ $filters['date_from'] }}"
+                aria-label="Fecha hasta"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            />
+            <div class="flex items-center gap-2">
+                <button
+                    type="submit"
+                    class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+                >
+                    <i class="fa-solid fa-filter text-xs" aria-hidden="true"></i> Filtrar
+                </button>
+                <a
+                    href="{{ route('audit.index') }}"
+                    class="inline-flex shrink-0 items-center gap-1 rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm font-medium text-neutral-700 shadow-sm transition-colors hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                >
+                    <i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i> Limpiar
+                </a>
+            </div>
+        </form>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
@@ -188,14 +187,15 @@
                             {{ $log->source_ip ?? '—' }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right sm:px-6">
-                            <a
-                                href="{{ route('audit.show', $log) }}"
-                                title="Ver detalle"
-                                class="flex h-8 w-8 items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm ml-auto dark:text-brand-400 dark:hover:bg-brand-900/40"
-                            >
-                                <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
-                                <span class="sr-only">Ver detalle del registro #{{ $log->id }}</span>
-                            </a>
+                            <div class="flex items-center justify-end">
+                                <a
+                                    href="{{ route('audit.show', $log) }}"
+                                    title="Ver detalle"
+                                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm dark:text-brand-400 dark:hover:bg-brand-900/40"
+                                >
+                                    <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @empty

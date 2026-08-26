@@ -19,12 +19,6 @@
         </div>
     </header>
 
-    @if (session('success'))
-        <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
-            <i class="fa-solid fa-check-circle mr-1"></i> {{ session('success') }}
-        </div>
-    @endif
-
     <div class="mt-6 grid items-start gap-6 lg:grid-cols-3">
         {{-- Foto de perfil --}}
         <div class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">

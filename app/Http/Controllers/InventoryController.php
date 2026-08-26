@@ -34,9 +34,12 @@ class InventoryController extends Controller
                 ->count(),
         ];
 
+        $categories = Category::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+
         return view('modules.inventory.index', [
             'products' => $products,
             'stats' => $stats,
+            'categories' => $categories,
         ]);
     }
 
@@ -131,13 +134,15 @@ class InventoryController extends Controller
             'is_active' => $product->is_active,
         ]);
 
-        return redirect()->route('inventory.index');
+        return redirect()->route('inventory.index')
+            ->with('success', $product->is_active ? 'Producto activado correctamente.' : 'Producto desactivado correctamente.');
     }
 
     public function destroy(Product $product): RedirectResponse
     {
         $product->delete();
 
-        return redirect()->route('inventory.index');
+        return redirect()->route('inventory.index')
+            ->with('success', 'Producto eliminado correctamente.');
     }
 }

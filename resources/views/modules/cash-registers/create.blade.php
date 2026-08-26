@@ -38,7 +38,8 @@
                             type="number"
                             name="opening_amount"
                             id="opening_amount"
-                            value="{{ old('opening_amount', '0.00') }}"
+                            value="{{ old('opening_amount') }}"
+                            placeholder="0.00"
                             step="0.01"
                             min="0"
                             required
@@ -63,6 +64,26 @@
                         <option value="NIGHT" {{ old('shift') === 'NIGHT' ? 'selected' : '' }}>Noche</option>
                     </select>
                     @error('shift')
+                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="responsible_id" class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Encargado de caja</label>
+                    <select
+                        name="responsible_id"
+                        id="responsible_id"
+                        class="w-full rounded-xl border border-brand-200 bg-white py-2.5 px-4 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+                    >
+                        <option value="">Sin encargado asignado</option>
+                        @foreach ($employees as $employee)
+                            <option value="{{ $employee->id }}" @selected(old('responsible_id') == $employee->id)>
+                                {{ $employee->full_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1.5 text-xs text-neutral-400 dark:text-neutral-500">Solo se listan usuarios activos con acceso al POS. No es obligatorio que seas tú.</p>
+                    @error('responsible_id')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                     @enderror
                 </div>

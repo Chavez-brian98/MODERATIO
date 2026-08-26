@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InventoryController;
@@ -36,6 +37,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pos/clientes', [PosController::class, 'searchCustomers'])->name('pos.customers');
     });
     Route::post('/pos/caja/abrir', [PosController::class, 'openCashRegister'])->name('pos.cash-register.open')->middleware('permission:cash_registers_create');
+    Route::post('/pos/caja/cerrar', [PosController::class, 'closeCashRegister'])->name('pos.cash-register.close')->middleware('permission:cash_registers_edit');
     Route::post('/pos/venta', [PosController::class, 'completeSale'])->name('pos.sale.complete')->middleware('permission:sales_create');
 
     // Caja / Arqueo
@@ -43,7 +45,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/caja/abrir', [CashRegisterController::class, 'create'])->name('cash-register.create')->middleware('permission:cash_registers_create');
     Route::post('/caja', [CashRegisterController::class, 'store'])->name('cash-register.store')->middleware('permission:cash_registers_create');
     Route::get('/caja/{cashRegister}', [CashRegisterController::class, 'show'])->name('cash-register.show')->middleware('permission:cash_registers_view');
+    Route::get('/caja/{cashRegister}/editar', [CashRegisterController::class, 'edit'])->name('cash-register.edit')->middleware('permission:cash_registers_edit');
     Route::patch('/caja/{cashRegister}/cerrar', [CashRegisterController::class, 'close'])->name('cash-register.close')->middleware('permission:cash_registers_edit');
+    Route::patch('/caja/{cashRegister}/estado', [CashRegisterController::class, 'toggleStatus'])->name('cash-register.toggle-status')->middleware('permission:cash_registers_edit');
+    Route::match(['put', 'patch'], '/caja/{cashRegister}', [CashRegisterController::class, 'update'])->name('cash-register.update')->middleware('permission:cash_registers_edit');
 
     // Inventario
     Route::get('/inventario', [InventoryController::class, 'index'])->name('inventory.index')->middleware('permission:products_view');
@@ -64,6 +69,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/categorias/{category}/estado', [CategoryController::class, 'toggleActive'])->name('categories.toggle')->middleware('permission:categories_edit');
     Route::match(['put', 'patch'], '/categorias/{category}', [CategoryController::class, 'update'])->name('categories.update')->middleware('permission:categories_edit');
     Route::delete('/categorias/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy')->middleware('permission:categories_delete');
+
+    // Clientes
+    Route::get('/clientes', [CustomerController::class, 'index'])->name('customers.index')->middleware('permission:customers_view');
+    Route::get('/clientes/crear', [CustomerController::class, 'create'])->name('customers.create')->middleware('permission:customers_create');
+    Route::post('/clientes', [CustomerController::class, 'store'])->name('customers.store')->middleware('permission:customers_create');
+    Route::get('/clientes/{customer}', [CustomerController::class, 'show'])->name('customers.show')->middleware('permission:customers_view');
+    Route::get('/clientes/{customer}/editar', [CustomerController::class, 'edit'])->name('customers.edit')->middleware('permission:customers_edit');
+    Route::patch('/clientes/{customer}/estado', [CustomerController::class, 'toggleActive'])->name('customers.toggle')->middleware('permission:customers_edit');
+    Route::match(['put', 'patch'], '/clientes/{customer}', [CustomerController::class, 'update'])->name('customers.update')->middleware('permission:customers_edit');
+    Route::delete('/clientes/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy')->middleware('permission:customers_delete');
 
     // Empleados
     Route::get('/empleados', [EmployeeController::class, 'index'])->name('employees.index')->middleware('permission:users_view');

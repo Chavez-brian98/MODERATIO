@@ -27,6 +27,7 @@ Roles del sistema, creados libremente por el usuario (ya no es un enum fijo).
 | description | varchar(255) | — | Descripción del rol |
 | is_active | boolean | not null, default: true | Estado del rol |
 | is_super_admin | boolean | not null, default: false | Si es `true`, el rol tiene acceso total sin necesidad de asignar cada permiso |
+| default_route | varchar(255) | nullable | Ruta por defecto a la que redirige el rol tras iniciar sesión |
 | created_at | timestamp | default: now | Fecha de creación |
 | updated_at | timestamp | default: now | Fecha de última actualización |
 
@@ -38,10 +39,12 @@ Usuarios del sistema.
 | id | int | PK, autoincremental | Identificador del usuario |
 | full_name | varchar(100) | not null | Nombre completo |
 | email | varchar(50) [NOT NULL, UNIQUE]         | Nombre de usuario para login                                        |
+| phone | varchar(20)                            | Teléfono del usuario                                                |
 | password | varchar(255) [NOT NULL]                | Contraseña encriptada con Bcrypt/Argon2                             |
 | address | varchar(255)                           | direccion del usuario                                               |
 | DUI   | varchar(10) [unique]                   | Indica el numero Unico De Identidad de la paersona                  |
 | Birthday | Date                                   | Ayuda a saber la edad de la persona y claro el dia de su cumpleaños |
+| photo | varchar(255) | nullable | Foto de perfil del usuario (ruta del archivo en storage) |
 | is_active | boolean | not null, default: true | Estado del usuario |
 | created_at | timestamp | default: now | Fecha de creación |
 | updated_at | timestamp | default: now | Fecha de última actualización |
@@ -151,6 +154,8 @@ Clientes del sistema (individuales o empresas).
 | created_at | timestamp | default: now | Fecha de creación |
 | updated_at | timestamp | default: now | Fecha de última actualización |
 
+**Índices de rendimiento:** `first_name` · `phone`
+
 ### `categories`
 Categorías de productos, con soporte para subcategorías.
 
@@ -186,6 +191,8 @@ Categorías de productos, con soporte para subcategorías.
 | created_at | timestamp | default: now | Fecha de creación |
 | updated_at | timestamp | default: now | Fecha de última actualización |
 
+**Índices de rendimiento:** `name` · `(current_stock, min_stock)` · `(is_active, category_id)` · `(is_active, current_stock)`
+
 ---
 
 ## Módulo: Cajas Registradoras
@@ -195,15 +202,21 @@ Categorías de productos, con soporte para subcategorías.
 | Atributo | Tipo | Restricciones | Descripción |
 |---|---|---|---|
 | id | int | PK, autoincremental | Identificador de la caja |
-| user_id | int | FK → `users.id`, not null | Usuario responsable |
+| user_id | int | FK → `users.id`, not null | Usuario que abrió la caja |
+| responsible_id | int | FK → `users.id`, nullable | Encargado del dinero en caja (opcional) |
 | shift | varchar(20) | — | Turno (ej. mañana/tarde) |
 | opening_amount | decimal(10,2) | not null | Monto de apertura |
-| theoretical_closing_amount | decimal(10,2) | — | Monto teórico de cierre |
+| theoretical_closing_amount | decimal(10,2) | — | Monto teórico de cierre (apertura + ventas en efectivo) |
 | actual_closing_amount | decimal(10,2) | — | Monto real de cierre |
 | difference | decimal(10,2) | — | Diferencia entre teórico y real |
+| closing_notes | text | nullable | Descripción/observaciones del cierre (inconvenientes, sobrante/faltante justificado) |
 | status | enum(`OPEN`, `CLOSED`) | not null, default: `OPEN` | Estado de la caja |
 | opening_date | timestamp | — | Fecha/hora de apertura |
 | closing_date | timestamp | — | Fecha/hora de cierre |
+| created_at | timestamp | nullable | Fecha de creación del registro |
+| updated_at | timestamp | nullable | Última actualización del registro |
+
+**Índices de rendimiento:** `(user_id, status)` · `opening_date`
 
 ---
 
@@ -226,6 +239,8 @@ Categorías de productos, con soporte para subcategorías.
 | observations | text | — | Observaciones |
 | created_at | timestamp | default: now | Fecha de la venta |
 
+**Índices de rendimiento:** `created_at` · `status` · `(status, created_at)` · `(payment_method, created_at)`
+
 ### `sale_details`
 Detalle de productos por venta.
 
@@ -239,6 +254,8 @@ Detalle de productos por venta.
 | unit_cost | decimal(10,2) | not null | Costo unitario |
 | discount | decimal(10,2) | not null, default: 0.00 | Descuento aplicado |
 | subtotal | decimal(10,2) | not null | Subtotal de la línea |
+
+**Índices de rendimiento:** `(sale_id, product_id)` · `(product_id, sale_id)`
 
 ---
 
@@ -256,6 +273,8 @@ Detalle de productos por venta.
 | total_returned | decimal(10,2) | not null | Monto total devuelto |
 | created_at | timestamp | default: now | Fecha de la devolución |
 
+**Índices de rendimiento:** `sale_id` · `cash_register_id` · `created_at`
+
 ### `return_details`
 Detalle de productos por devolución.
 
@@ -266,6 +285,8 @@ Detalle de productos por devolución.
 | product_id | int | FK → `products.id`, not null | Producto devuelto |
 | quantity | int | not null | Cantidad devuelta |
 | subtotal_returned | decimal(10,2) | not null | Subtotal devuelto |
+
+**Índices de rendimiento:** `return_id` · `product_id`
 
 ---
 
@@ -286,6 +307,8 @@ Registro inmutable de acciones realizadas en el sistema.
 | new_values | JSON | — | Valores nuevos (snapshot al crear, cambios al actualizar) |
 | source_ip | varchar(45) | — | IP de origen |
 | created_at | timestamp | default: now | Fecha del evento |
+
+**Índices de rendimiento:** `created_at` · `user_id` · `(affected_table, record_id)` · `(user_id, created_at)`
 
 ---
 

@@ -66,27 +66,59 @@
         @endforeach
     </section>
 
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative w-full sm:max-w-sm">
-            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input
-                type="search"
-                id="employee-search"
-                placeholder="Buscar empleado..."
-                autocomplete="off"
-                class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
-            />
+    <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="employee-search"
+                    placeholder="Buscar empleado..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
+
+            @php
+                $availableRoles = $employees
+                    ->map(fn ($employee) => $employee->roles->first())
+                    ->filter()
+                    ->unique('name')
+                    ->sortBy(fn ($role) => $roleLabels[$role->name] ?? $role->name);
+            @endphp
+
+            @if ($availableRoles->isNotEmpty())
+                <select
+                    id="employee-filter-role"
+                    aria-label="Filtrar por rol"
+                    class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                >
+                    <option value="">Todos los roles</option>
+                    @foreach ($availableRoles as $role)
+                        <option value="{{ $role->name }}">{{ $roleLabels[$role->name] ?? $role->name }}</option>
+                    @endforeach
+                </select>
+            @endif
+
+            <select
+                id="employee-filter-status"
+                aria-label="Filtrar por estado"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todos los estados</option>
+                <option value="1">Activos</option>
+                <option value="0">Inactivos</option>
+            </select>
         </div>
 
         @can('users_create')
             <a
                 href="{{ route('employees.create') }}"
-                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+                class="ml-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
             >
-                <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                Nuevo empleado
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Nuevo empleado
             </a>
         @endcan
     </div>
@@ -99,10 +131,9 @@
                     <th class="px-4 py-3 sm:px-6">ID</th>
                     <th class="px-4 py-3 sm:px-6">Empleado</th>
                     <th class="hidden px-4 py-3 sm:px-6 md:table-cell">DUI</th>
-                    <th class="hidden px-4 py-3 sm:px-6 lg:table-cell">Dirección</th>
+                    <th class="hidden px-4 py-3 sm:px-6 lg:table-cell">Teléfono</th>
                     <th class="hidden px-4 py-3 sm:px-6 md:table-cell">Rol</th>
                     <th class="px-4 py-3 sm:px-6">Estado</th>
-                    <th class="hidden px-4 py-3 sm:px-6 lg:table-cell">Creada</th>
                     <th class="px-4 py-3 text-right sm:px-6">Acciones</th>
                 </tr>
                 </thead>
@@ -110,7 +141,9 @@
                 @forelse ($employees as $employee)
                     <tr
                         data-employee-row
-                        data-employee-search="{{ strtolower(trim($employee->full_name . ' ' . $employee->email . ' ' . ($employee->DUI ?? '') . ' ' . ($employee->address ?? '') . ' ' . ($roleLabels[$employee->roles->first()?->name] ?? $employee->roles->first()?->name ?? ''))) }}"
+                        data-employee-search="{{ strtolower(trim($employee->full_name . ' ' . $employee->email . ' ' . ($employee->DUI ?? '') . ' ' . ($employee->phone ?? '') . ' ' . ($roleLabels[$employee->roles->first()?->name] ?? $employee->roles->first()?->name ?? ''))) }}"
+                        data-employee-role="{{ $employee->roles->first()?->name }}"
+                        data-employee-active="{{ $employee->is_active ? '1' : '0' }}"
                         class="{{ $employee->is_active ? 'hover:bg-brand-50/40 dark:hover:bg-neutral-800/50' : 'bg-neutral-50 hover:bg-neutral-100/60 dark:bg-neutral-800/30 dark:hover:bg-neutral-800/60' }}"
                     >
                         <td class="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400 sm:px-6">#{{ $employee->id }}</td>
@@ -128,7 +161,7 @@
                             {{ $employee->DUI ?? '—' }}
                         </td>
                         <td class="hidden max-w-[200px] truncate px-4 py-3 text-sm text-neutral-500 dark:text-neutral-400 sm:px-6 lg:table-cell">
-                            {{ $employee->address ?? '—' }}
+                            {{ $employee->phone ?? '—' }}
                         </td>
                         <td class="hidden whitespace-nowrap px-4 py-3 sm:px-6 md:table-cell">
                             @if ($employee->roles->first())
@@ -151,9 +184,6 @@
                                     Inactivo
                                 </span>
                             @endif
-                        </td>
-                        <td class="hidden whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400 sm:px-6 lg:table-cell">
-                            {{ $employee->created_at->format('d/m/Y') }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right sm:px-6">
                             <div class="flex items-center justify-end gap-1.5">
@@ -198,7 +228,7 @@
                                                 type="submit"
                                                 data-disable-employee
                                                 title="Deshabilitar"
-                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
                                             >
                                                 <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
                                             </button>
@@ -227,7 +257,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-12 text-center sm:px-6">
+                        <td colspan="7" class="px-4 py-12 text-center sm:px-6">
                             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400">
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                     <path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -240,7 +270,7 @@
                 @endforelse
 
                 <tr id="no-results-row" class="hidden">
-                    <td colspan="8" class="px-4 py-12 text-center sm:px-6">
+                    <td colspan="7" class="px-4 py-12 text-center sm:px-6">
                         <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Sin resultados</p>
                         <p class="mt-1 text-xs text-neutral-400 dark:text-neutral-500">No se encontraron empleados para la búsqueda.</p>
                     </td>
@@ -256,15 +286,18 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('employee-search');
+            const filterRole = document.getElementById('employee-filter-role');
+            const filterStatus = document.getElementById('employee-filter-status');
             const rows = document.querySelectorAll('[data-employee-row]');
             const noResultsRow = document.getElementById('no-results-row');
 
-            searchInput.addEventListener('input', () => {
+            function applyFilters() {
                 const term = searchInput.value.trim().toLowerCase();
+                const roleFilter = filterRole ? filterRole.value : '';
+                const statusFilter = filterStatus ? filterStatus.value : '';
                 let visible = 0;
 
                 if (rows.length === 0) {
@@ -273,7 +306,10 @@
                 }
 
                 rows.forEach((row) => {
-                    const show = row.dataset.employeeSearch.includes(term);
+                    const matchesSearch = row.dataset.employeeSearch.includes(term);
+                    const matchesRole = !roleFilter || row.dataset.employeeRole === roleFilter;
+                    const matchesStatus = !statusFilter || row.dataset.employeeActive === statusFilter;
+                    const show = matchesSearch && matchesRole && matchesStatus;
                     row.classList.toggle('hidden', !show);
                     if (show) {
                         visible++;
@@ -281,7 +317,11 @@
                 });
 
                 noResultsRow.classList.toggle('hidden', visible > 0);
-            });
+            }
+
+            searchInput.addEventListener('input', applyFilters);
+            filterRole?.addEventListener('change', applyFilters);
+            filterStatus?.addEventListener('change', applyFilters);
 
             document.querySelectorAll('[data-disable-employee]').forEach((button) => {
                 button.addEventListener('click', (event) => {
@@ -295,7 +335,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Sí, deshabilitar',
                         cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#D76AA2',
+                        confirmButtonColor: window.SwalColors.brand,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
@@ -316,7 +356,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Sí, eliminar',
                         cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#dc2626',
+                        confirmButtonColor: window.SwalColors.danger,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();

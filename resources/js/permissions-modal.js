@@ -99,17 +99,22 @@ const bindModalBehaviour = (modal) => {
                 throw new Error('Request failed');
             }
 
-            await Swal.fire({
-                title: 'Permisos actualizados',
-                text: 'Los permisos se guardaron correctamente.',
-                icon: 'success',
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#D76AA2',
-                timer: 2500,
-                timerProgressBar: true,
-            });
+            if (typeof window.notifySuccess === 'function') {
+                window.notifySuccess('Permisos actualizados correctamente.');
+                setTimeout(() => window.location.reload(), 900);
+            } else {
+                await Swal.fire({
+                    title: 'Permisos actualizados',
+                    text: 'Los permisos se guardaron correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#D76AA2',
+                    timer: 2500,
+                    timerProgressBar: true,
+                });
 
-            window.location.reload();
+                window.location.reload();
+            }
         } catch (error) {
             submitButton?.removeAttribute('disabled');
 
@@ -118,7 +123,7 @@ const bindModalBehaviour = (modal) => {
                 text: 'No se pudieron guardar los permisos. Inténtalo de nuevo.',
                 icon: 'error',
                 confirmButtonText: 'Cerrar',
-                confirmButtonColor: '#dc2626',
+                confirmButtonColor: window.SwalColors?.danger ?? '#dc2626',
             });
         }
     });

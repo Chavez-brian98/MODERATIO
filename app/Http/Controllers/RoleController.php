@@ -47,7 +47,8 @@ class RoleController extends Controller
 
         $role = Role::create($validated);
 
-        return redirect()->route('roles.index');
+        return redirect()->route('roles.index')
+            ->with('success', 'Rol creado correctamente.');
     }
 
     public function show(Role $role): View
@@ -75,7 +76,8 @@ class RoleController extends Controller
         $role->is_active = $request->boolean('is_active');
         $role->save();
 
-        return redirect()->route('roles.index');
+        return redirect()->route('roles.index')
+            ->with('success', 'Rol actualizado correctamente.');
     }
 
     public function toggleActive(Role $role): RedirectResponse
@@ -88,14 +90,16 @@ class RoleController extends Controller
             'is_active' => $role->is_active,
         ]);
 
-        return redirect()->route('roles.index');
+        return redirect()->route('roles.index')
+            ->with('success', $role->is_active ? 'Rol activado correctamente.' : 'Rol deshabilitado correctamente.');
     }
 
     public function destroy(Role $role): RedirectResponse
     {
         $role->delete();
 
-        return redirect()->route('roles.index');
+        return redirect()->route('roles.index')
+            ->with('success', 'Rol eliminado correctamente.');
     }
 
     public function permissions(Role $role): View

@@ -14,15 +14,25 @@ class CategoryController extends Controller
     public function index(Request $request): View
     {
         $perPage = $request->integer('per_page', 10);
+        $type = in_array($request->input('type'), ['parent', 'sub'], true) ? $request->input('type') : 'all';
+        $status = in_array($request->input('status'), ['active', 'inactive'], true) ? $request->input('status') : 'all';
 
         $categories = Category::query()
             ->with('parent')
             ->withCount(['products', 'children'])
+            ->when($type === 'parent', fn ($query) => $query->whereNull('parent_category_id'))
+            ->when($type === 'sub', fn ($query) => $query->whereNotNull('parent_category_id'))
+            ->when($status === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('modules.categories.index', ['categories' => $categories]);
+        return view('modules.categories.index', [
+            'categories' => $categories,
+            'type' => $type,
+            'status' => $status,
+        ]);
     }
 
     public function create(): View
@@ -48,7 +58,8 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
-        return redirect()->route('categories.index');
+        return redirect()->route('categories.index')
+            ->with('success', 'Categoría creada correctamente.');
     }
 
     public function show(Category $category): View
@@ -85,7 +96,8 @@ class CategoryController extends Controller
         $category->is_active = $request->boolean('is_active');
         $category->save();
 
-        return redirect()->route('categories.index');
+        return redirect()->route('categories.index')
+            ->with('success', 'Categoría actualizada correctamente.');
     }
 
     public function toggleActive(Category $category): RedirectResponse
@@ -98,13 +110,15 @@ class CategoryController extends Controller
             'is_active' => $category->is_active,
         ]);
 
-        return redirect()->route('categories.index');
+        return redirect()->route('categories.index')
+            ->with('success', $category->is_active ? 'Categoría activada correctamente.' : 'Categoría deshabilitada correctamente.');
     }
 
     public function destroy(Category $category): RedirectResponse
     {
         $category->delete();
 
-        return redirect()->route('categories.index');
+        return redirect()->route('categories.index')
+            ->with('success', 'Categoría eliminada correctamente.');
     }
 }

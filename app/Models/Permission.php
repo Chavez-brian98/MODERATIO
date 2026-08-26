@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Permission extends Model
 {
+    protected static function booted(): void
+    {
+        static::created(fn (Permission $permission) => $permission->updateQuietly(['updated_at' => null]));
+    }
+
     protected $fillable = ['name', 'display_name', 'description'];
 
     public function resource(): BelongsTo

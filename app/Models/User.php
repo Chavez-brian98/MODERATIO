@@ -5,18 +5,24 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['full_name', 'email', 'password', 'address', 'DUI', 'birthday', 'photo', 'is_active'])]
+#[Fillable(['full_name', 'email', 'phone', 'password', 'address', 'DUI', 'birthday', 'photo', 'is_active'])]
 #[Hidden(['password'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    protected static function booted(): void
+    {
+        static::created(fn (User $user) => $user->updateQuietly(['updated_at' => null]));
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -91,16 +97,46 @@ class User extends Authenticatable
 
     public function hasEffectivePermission(Permission|int|string $permission): bool
     {
-        $permissionId = match (true) {
-            $permission instanceof Permission => $permission->id,
-            is_int($permission) => $permission,
-            default => Permission::query()->where('name', $permission)->value('id'),
-        };
+        $permissionId = self::resolvePermissionId($permission);
 
         if ($permissionId === null) {
             return false;
         }
 
         return in_array((int) $permissionId, $this->effectivePermissionIds(), true);
+    }
+
+    /**
+     * Filter users who can effectively use a permission: super-admin roles,
+     * role inheritance and direct grants, minus direct denies.
+     */
+    public function scopeWithEffectivePermission(Builder $query, Permission|int|string $permission): Builder
+    {
+        $permissionId = self::resolvePermissionId($permission);
+
+        if ($permissionId === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query
+            ->where(function (Builder $q) use ($permissionId) {
+                $q->whereHas('roles', fn (Builder $r) => $r->where('is_super_admin', true))
+                    ->orWhereHas('roles.permissions', fn (Builder $p) => $p->where('permissions.id', $permissionId))
+                    ->orWhereHas('permissions', fn (Builder $p) => $p
+                        ->where('permissions.id', $permissionId)
+                        ->where('user_has_permissions.type', 'grant'));
+            })
+            ->whereDoesntHave('permissions', fn (Builder $p) => $p
+                ->where('permissions.id', $permissionId)
+                ->where('user_has_permissions.type', 'deny'));
+    }
+
+    private static function resolvePermissionId(Permission|int|string $permission): ?int
+    {
+        return match (true) {
+            $permission instanceof Permission => $permission->id,
+            is_int($permission) => $permission,
+            default => Permission::query()->where('name', $permission)->value('id'),
+        };
     }
 }

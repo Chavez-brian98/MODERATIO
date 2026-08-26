@@ -137,8 +137,14 @@
                     <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $employee->created_at->format('d/m/Y \a \l\a\s H:i') }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
-                    <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Última actualización</dt>
-                    <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $employee->updated_at->format('d/m/Y \a \l\a\s H:i') }}</dd>
+                    <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Editado por última vez</dt>
+                    <dd class="text-right text-sm text-neutral-900 dark:text-white">
+                        @if ($employee->updated_at->equalTo($employee->created_at))
+                            —
+                        @else
+                            {{ $employee->updated_at->format('d/m/Y \a \l\a\s H:i') }}
+                        @endif
+                    </dd>
                 </div>
             </dl>
         </div>

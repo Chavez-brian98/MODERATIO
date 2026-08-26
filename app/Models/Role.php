@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends Model
 {
+    protected static function booted(): void
+    {
+        static::created(fn (Role $role) => $role->updateQuietly(['updated_at' => null]));
+    }
+
     protected $fillable = ['name', 'description', 'is_active', 'is_super_admin', 'default_route'];
 
     protected $casts = [

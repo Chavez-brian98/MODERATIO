@@ -65,19 +65,49 @@
         </div>
     </div>
 
-    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative flex-1 sm:max-w-xs">
-            <i class="fa-solid fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
-            <input
-                type="text"
-                id="cash-register-search"
-                placeholder="Buscar por ID, turno o empleado..."
-                class="w-full rounded-xl border border-brand-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder:text-neutral-500"
-            />
+    <div class="mt-6 mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="cash-register-search"
+                    placeholder="Buscar por ID, turno o empleado..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
+
+            <select
+                id="filter-status"
+                aria-label="Filtrar por estado"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todos los estados</option>
+                <option value="OPEN">Abiertas</option>
+                <option value="CLOSED">Cerradas</option>
+            </select>
+
+            <select
+                id="filter-shift"
+                aria-label="Filtrar por turno"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todos los turnos</option>
+                <option value="MORNING">Mañana</option>
+                <option value="AFTERNOON">Tarde</option>
+                <option value="NIGHT">Noche</option>
+            </select>
         </div>
+
         @can('cash_registers_create')
-            <a href="{{ route('cash-register.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
-                <i class="fa-solid fa-plus text-xs"></i> Abrir Caja
+            <a
+                href="{{ route('cash-register.create') }}"
+                class="ml-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Abrir Caja
             </a>
         @endcan
     </div>
@@ -89,21 +119,25 @@
                     <tr class="border-b border-brand-100 bg-brand-50/60 dark:border-neutral-700 dark:bg-neutral-800/60">
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">ID</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Turno</th>
-                        <th class="hidden px-4 py-3 font-semibold text-brand-800 sm:table-cell dark:text-brand-200">Empleado</th>
-                        <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Monto Apertura</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 sm:table-cell dark:text-brand-200">Abierta por</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Encargado</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Apertura</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 lg:table-cell dark:text-brand-200">Creada</th>
                         <th class="hidden px-4 py-3 font-semibold text-brand-800 lg:table-cell dark:text-brand-200">Ventas</th>
-                        <th class="hidden px-4 py-3 font-semibold text-brand-800 lg:table-cell dark:text-brand-200">Total Ventas</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 xl:table-cell dark:text-brand-200">Total Ventas</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Estado</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="cash-register-tbody" class="divide-y divide-neutral-100 dark:divide-neutral-800">
                     @forelse ($registers as $register)
-                        <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40" data-search="{{ strtolower($register->id . ' ' . ($shiftLabels[$register->shift] ?? $register->shift ?? '') . ' ' . $register->user->full_name) }}">
+                        <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40" data-search="{{ strtolower($register->id . ' ' . ($shiftLabels[$register->shift] ?? $register->shift ?? '') . ' ' . $register->user->full_name . ' ' . ($register->responsible?->full_name ?? '')) }}" data-status="{{ $register->status }}" data-shift="{{ $register->shift ?? '' }}">
                             <td class="px-4 py-3 font-medium text-neutral-800 dark:text-neutral-200">#{{ $register->id }}</td>
                             <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">{{ $shiftLabels[$register->shift] ?? $register->shift ?? '—' }}</td>
                             <td class="hidden px-4 py-3 sm:table-cell dark:text-neutral-300">{{ $register->user->full_name }}</td>
+                            <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300">{{ $register->responsible?->full_name ?? '—' }}</td>
                             <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300">${{ number_format($register->opening_amount, 2) }}</td>
+                            <td class="hidden px-4 py-3 whitespace-nowrap lg:table-cell dark:text-neutral-300">{{ $register->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
                             <td class="hidden px-4 py-3 lg:table-cell dark:text-neutral-300">{{ $register->sales_count }}</td>
                             <td class="hidden px-4 py-3 lg:table-cell dark:text-neutral-300">${{ number_format($register->sales_sum_total ?? 0, 2) }}</td>
                             <td class="px-4 py-3">
@@ -118,14 +152,21 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                <a href="{{ route('cash-register.show', $register) }}" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-100 dark:bg-brand-900/20 dark:text-brand-300 dark:hover:bg-brand-900/40">
-                                    <i class="fa-solid fa-eye text-[10px]"></i> Ver
-                                </a>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a href="{{ route('cash-register.show', $register) }}" title="Ver detalle" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm dark:text-brand-400 dark:hover:bg-brand-900/40">
+                                        <i class="fa-solid fa-eye text-sm"></i>
+                                    </a>
+                                    @can('cash_registers_edit')
+                                        <a href="{{ route('cash-register.edit', $register) }}" title="Editar caja (corregir errores de captura)" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40">
+                                            <i class="fa-solid fa-pen-to-square text-sm"></i>
+                                        </a>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-12 text-center">
+                            <td colspan="10" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <div class="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-brand-400 dark:bg-brand-900/30 dark:text-brand-500">
                                         <i class="fa-solid fa-cash-register text-2xl"></i>
@@ -148,11 +189,28 @@
 
 @section('scripts')
     <script>
-        document.getElementById('cash-register-search')?.addEventListener('input', function () {
-            const query = this.value.toLowerCase();
-            document.querySelectorAll('#cash-register-tbody tr[data-search]').forEach(function (row) {
-                row.style.display = row.dataset.search.includes(query) ? '' : 'none';
-            });
-        });
+        (function () {
+            const searchInput = document.getElementById('cash-register-search');
+            const filterStatus = document.getElementById('filter-status');
+            const filterShift = document.getElementById('filter-shift');
+            const rows = document.querySelectorAll('#cash-register-tbody tr[data-search]');
+
+            function applyFilters() {
+                const query = searchInput?.value.toLowerCase() ?? '';
+                const status = filterStatus?.value ?? '';
+                const shift = filterShift?.value ?? '';
+
+                rows.forEach(function (row) {
+                    const matchSearch = row.dataset.search.includes(query);
+                    const matchStatus = !status || row.dataset.status === status;
+                    const matchShift = !shift || row.dataset.shift === shift;
+                    row.style.display = matchSearch && matchStatus && matchShift ? '' : 'none';
+                });
+            }
+
+            searchInput?.addEventListener('input', applyFilters);
+            filterStatus?.addEventListener('change', applyFilters);
+            filterShift?.addEventListener('change', applyFilters);
+        })();
     </script>
 @endsection

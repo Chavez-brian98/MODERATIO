@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Resource extends Model
 {
+    protected static function booted(): void
+    {
+        static::created(fn (Resource $resource) => $resource->updateQuietly(['updated_at' => null]));
+    }
+
     protected $fillable = ['name', 'display_name', 'description', 'icon', 'is_active'];
 
     protected $casts = [

@@ -57,15 +57,50 @@
         </div>
     </div>
 
-    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative flex-1 sm:max-w-xs">
-            <i class="fa-solid fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
-            <input type="text" id="returns-search" placeholder="Buscar por venta, empleado..."
-                class="w-full rounded-xl border border-brand-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder:text-neutral-500" />
+    <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="returns-search"
+                    placeholder="Buscar por venta, empleado..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
+
+            <input
+                type="date"
+                id="filter-date-from"
+                aria-label="Fecha desde"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            />
+
+            <input
+                type="date"
+                id="filter-date-to"
+                aria-label="Fecha hasta"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            />
+
+            <select
+                id="filter-employee"
+                aria-label="Filtrar por empleado"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todos los empleados</option>
+            </select>
         </div>
+
         @can('returns_create')
-            <a href="{{ route('returns.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
-                <i class="fa-solid fa-plus text-xs"></i> Nueva Devolución
+            <a
+                href="{{ route('returns.create') }}"
+                class="ml-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Nueva Devolución
             </a>
         @endcan
     </div>
@@ -87,7 +122,9 @@
                 <tbody id="returns-tbody" class="divide-y divide-neutral-100 dark:divide-neutral-800">
                     @forelse ($returns as $return)
                         <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40"
-                            data-search="{{ strtolower('#' . $return->id . ' ' . $return->sale->ticket_number . ' ' . $return->user->full_name) }}">
+                            data-search="{{ strtolower('#' . $return->id . ' ' . $return->sale->ticket_number . ' ' . $return->user->full_name) }}"
+                            data-employee="{{ $return->user->full_name }}"
+                            data-date="{{ $return->created_at?->format('Y-m-d') }}">
                             <td class="px-4 py-3 font-medium text-neutral-800 dark:text-neutral-200">#{{ $return->id }}</td>
                             <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">{{ $return->created_at->format('d/m/Y H:i') }}</td>
                             <td class="hidden px-4 py-3 sm:table-cell dark:text-neutral-300">{{ $return->sale->ticket_number }}</td>
@@ -95,9 +132,11 @@
                             <td class="hidden px-4 py-3 lg:table-cell dark:text-neutral-300">{{ $return->details->count() }} producto(s)</td>
                             <td class="px-4 py-3 font-semibold text-red-600 dark:text-red-400">-${{ number_format($return->total_returned, 2) }}</td>
                             <td class="px-4 py-3">
-                                <a href="{{ route('returns.show', $return) }}" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-100 dark:bg-brand-900/20 dark:text-brand-300 dark:hover:bg-brand-900/40">
-                                    <i class="fa-solid fa-eye text-[10px]"></i> Ver
-                                </a>
+                                <div class="flex items-center justify-end">
+                                    <a href="{{ route('returns.show', $return) }}" title="Ver detalle" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm dark:text-brand-400 dark:hover:bg-brand-900/40">
+                                        <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -125,11 +164,44 @@
 
 @section('scripts')
     <script>
-        document.getElementById('returns-search')?.addEventListener('input', function () {
-            const query = this.value.toLowerCase();
+        (function () {
+            var employeeSelect = document.getElementById('filter-employee');
+            var seen = {};
             document.querySelectorAll('#returns-tbody tr[data-search]').forEach(function (row) {
-                row.style.display = row.dataset.search.includes(query) ? '' : 'none';
+                var name = row.dataset.employee;
+                if (name && !seen[name]) {
+                    seen[name] = true;
+                    var opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    employeeSelect.appendChild(opt);
+                }
             });
-        });
+
+            var searchInput = document.getElementById('returns-search');
+            var dateFrom = document.getElementById('filter-date-from');
+            var dateTo = document.getElementById('filter-date-to');
+
+            function applyFilters() {
+                var query = searchInput ? searchInput.value.toLowerCase() : '';
+                var from = dateFrom ? dateFrom.value : '';
+                var to = dateTo ? dateTo.value : '';
+                var emp = employeeSelect ? employeeSelect.value : '';
+
+                document.querySelectorAll('#returns-tbody tr[data-search]').forEach(function (row) {
+                    var match = true;
+                    if (query && !row.dataset.search.includes(query)) match = false;
+                    if (emp && row.dataset.employee !== emp) match = false;
+                    if (from && row.dataset.date < from) match = false;
+                    if (to && row.dataset.date > to) match = false;
+                    row.style.display = match ? '' : 'none';
+                });
+            }
+
+            searchInput && searchInput.addEventListener('input', applyFilters);
+            dateFrom && dateFrom.addEventListener('change', applyFilters);
+            dateTo && dateTo.addEventListener('change', applyFilters);
+            employeeSelect && employeeSelect.addEventListener('change', applyFilters);
+        })();
     </script>
 @endsection

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
             $table->enum('type', ['grant', 'deny'])->default('grant');
-            $table->timestamps();
+            $table->timestamp('created_at')->nullable();
 
             $table->unique(['user_id', 'permission_id']);
         });

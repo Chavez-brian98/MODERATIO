@@ -23,12 +23,9 @@ class RolePermissionTest extends TestCase
 
     private function seedPermissions(): Role
     {
-        $role = Role::create(['name' => 'ADMINISTRATOR', 'description' => 'Full access']);
-
         $this->seed(PermissionSeeder::class);
-        $role->refresh();
 
-        return $role;
+        return Role::where('name', 'ADMINISTRATOR')->first();
     }
 
     public function test_permission_seeder_creates_expected_counts(): void

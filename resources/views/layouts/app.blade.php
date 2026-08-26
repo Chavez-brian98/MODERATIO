@@ -87,6 +87,7 @@
                         'items' => [
                             ['route' => 'pos', 'label' => 'POS', 'path' => 'M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z', 'permission' => 'sales_view'],
                             ['route' => 'cash-register.index', 'label' => 'Caja / Arqueo', 'path' => 'M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'permission' => 'cash_registers_view'],
+                            ['route' => 'customers.index', 'label' => 'Clientes', 'path' => 'M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z', 'permission' => 'customers_view'],
                         ],
                     ],
                     [
@@ -230,6 +231,87 @@
         </div>
     </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    (() => {
+        window.SwalColors = {
+            brand: '#D76AA2',
+            brandDark: '#B0487F',
+            danger: '#dc2626',
+            warning: '#d97706',
+            success: '#059669',
+        };
+
+        window.notifySuccess = (title) => {
+            if (typeof Swal === 'undefined') {
+                return;
+            }
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                iconColor: window.SwalColors.success,
+            });
+        };
+
+        window.notifyError = (title) => {
+            if (typeof Swal === 'undefined') {
+                return;
+            }
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title,
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                iconColor: window.SwalColors.danger,
+            });
+        };
+
+        @if (session('success'))
+            window.notifySuccess(@json(session('success')));
+    @endif
+
+        @if (session('error'))
+            window.notifyError(@json(session('error')));
+    @endif
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target.closest('form[data-swal-confirm]');
+
+            if (!form || form.dataset.swalConfirmed === 'true') {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            Swal.fire({
+                title: form.dataset.swalConfirmTitle || '¿Estás seguro?',
+                text: form.dataset.swalConfirm,
+                icon: form.dataset.swalConfirmIcon || 'question',
+                showCancelButton: true,
+                confirmButtonText: form.dataset.swalConfirmButton || 'Sí, continuar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: window.SwalColors[form.dataset.swalConfirmColor || 'brand'],
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.dataset.swalConfirmed = 'true';
+                    form.submit();
+                }
+            });
+        }, true);
+    })();
+</script>
 
 @yield('scripts')
 <script>
