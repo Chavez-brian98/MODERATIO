@@ -71,9 +71,21 @@ class PosService
             ->first();
     }
 
+    public function getOpenCashRegisterForUser(int $userId): ?CashRegister
+    {
+        return CashRegister::query()
+            ->where('status', 'OPEN')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhere('responsible_id', $userId);
+            })
+            ->latest('opening_date')
+            ->first();
+    }
+
     public function completeSale(array $items, int $userId, ?int $cashRegisterId, ?int $customerId, string $paymentMethod, float $amountReceived, ?string $observations = null): Sale
     {
-        return DB::transaction(function () use ($items, $userId, $cashRegisterId, $customerId, $paymentMethod, $amountReceived, $observations) {
+        $sale = DB::transaction(function () use ($items, $userId, $cashRegisterId, $customerId, $paymentMethod, $amountReceived, $observations) {
             $subtotal = 0;
             $taxTotal = 0;
 
@@ -127,6 +139,39 @@ class PosService
 
             return $sale->load(['details.product', 'customer', 'cashRegister']);
         });
+
+        if ($customerId) {
+            $this->evaluateCustomerType($customerId);
+        }
+
+        return $sale;
+    }
+
+    private function evaluateCustomerType(int $customerId): void
+    {
+        $customer = Customer::where('id', $customerId)->first();
+
+        if (! $customer || $customer->customer_type === 'WHOLESALER') {
+            return;
+        }
+
+        $lastSaleDate = Sale::where('customer_id', $customerId)
+            ->latest('created_at')
+            ->value('created_at');
+
+        if ($customer->customer_type === 'FREQUENT' && $lastSaleDate && $lastSaleDate->diffInDays(now()) > 45) {
+            $customer->update(['customer_type' => 'REGULAR']);
+
+            return;
+        }
+
+        $recentSales = Sale::where('customer_id', $customerId)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->count();
+
+        if ($recentSales > 5 && $customer->customer_type === 'REGULAR') {
+            $customer->update(['customer_type' => 'FREQUENT']);
+        }
     }
 
     private function generateTicketNumber(): string

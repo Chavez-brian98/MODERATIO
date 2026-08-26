@@ -3,12 +3,29 @@
 @section('title', 'POS · ' . config('app.name'))
 
 @section('content')
+    @php
+        $shiftLabels = [
+            'MORNING' => 'Mañana',
+            'AFTERNOON' => 'Tarde',
+            'NIGHT' => 'Noche',
+        ];
+    @endphp
+
     @include('partials.breadcrumbs', ['crumbs' => [
         ['label' => 'POS', 'url' => route('pos')],
         ['label' => 'Punto de Venta'],
     ]])
 
-    <div id="pos-app" class="flex h-[calc(100vh-8rem)] flex-col gap-4 lg:flex-row">
+    @if (! $cashRegister)
+        <div class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span class="flex-1">
+                No puedes realizar ventas hasta tener una caja abierta a tu cargo. Puedes abrir una tú mismo para comenzar a vender.
+            </span>
+        </div>
+    @endif
+
+    <div id="pos-app" class="flex flex-col gap-4 lg:h-[calc(100vh-8rem)] lg:flex-row">
         {{-- Left: Products --}}
         <div class="flex min-h-0 flex-1 flex-col">
             {{-- Search bar --}}
@@ -40,7 +57,17 @@
                     <div class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 dark:border-neutral-700 dark:bg-brand-900/30 dark:text-brand-400">
                         <i class="fa-solid fa-cash-register" aria-hidden="true"></i>
                         Caja abierta
-                        <span class="ml-1 rounded-full bg-brand-200 px-2 py-0.5 text-xs font-semibold dark:bg-brand-800">{{ $cashRegister->shift }}</span>
+                        <span class="ml-1 rounded-full bg-brand-200 px-2 py-0.5 text-xs font-semibold dark:bg-brand-800">{{ $shiftLabels[$cashRegister->shift] ?? $cashRegister->shift }}</span>
+                        @can('cash_registers_edit')
+                            <button
+                                type="button"
+                                id="btn-close-register"
+                                title="Cerrar esta caja"
+                                class="-mr-1 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
+                            >
+                                <i class="fa-solid fa-lock" aria-hidden="true"></i> Cerrar caja
+                            </button>
+                        @endcan
                     </div>
                 @endif
             </div>
@@ -211,8 +238,8 @@
     </div>
 
     {{-- Open Cash Register Modal --}}
-    <div id="register-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 backdrop-blur-sm" style="display:none;">
-        <div class="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
+    <div id="register-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm" style="display:none;">
+        <div class="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
             <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Abrir caja</h3>
             <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Ingresa el monto de apertura y selecciona el turno.</p>
             <form id="form-open-register" class="mt-4 space-y-3">
@@ -224,7 +251,7 @@
                         name="opening_amount"
                         min="0"
                         step="0.01"
-                        value="0"
+                        placeholder="0.00"
                         required
                         class="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                     />
@@ -254,9 +281,72 @@
         </div>
     </div>
 
+    {{-- Close Cash Register Modal --}}
+    @if ($cashRegister)
+        @can('cash_registers_edit')
+            <div id="close-register-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm" style="display:none;">
+                <div class="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
+                    <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Cerrar caja</h3>
+                    <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Cuadra el efectivo y cierra tu caja sin salir del POS.</p>
+
+                    <div class="mt-4 space-y-1.5 rounded-xl bg-neutral-50 p-3 text-xs dark:bg-neutral-800/60">
+                        <div class="flex justify-between">
+                            <span class="text-neutral-500 dark:text-neutral-400">Apertura</span>
+                            <span class="font-medium text-neutral-800 dark:text-neutral-200">${{ number_format($cashSummary['opening_amount'], 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-neutral-500 dark:text-neutral-400">+ Ventas en efectivo</span>
+                            <span class="font-medium text-neutral-800 dark:text-neutral-200">${{ number_format($cashSummary['cash_sales'], 2) }}</span>
+                        </div>
+                        <div class="flex justify-between border-t border-neutral-200 pt-1.5 dark:border-neutral-700">
+                            <span class="font-semibold text-neutral-700 dark:text-neutral-300">= Teórico</span>
+                            <span class="font-bold text-brand-600 dark:text-brand-400">${{ number_format($cashSummary['theoretical'], 2) }}</span>
+                        </div>
+                    </div>
+
+                    <form id="form-close-register" class="mt-4 space-y-3">
+                        <div>
+                            <label for="close-register-amount" class="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Monto real en efectivo <span class="text-red-500">*</span></label>
+                            <input
+                                type="number"
+                                id="close-register-amount"
+                                name="actual_closing_amount"
+                                min="0"
+                                step="0.01"
+                                placeholder="{{ number_format($cashSummary['theoretical'], 2, '.', '') }}"
+                                required
+                                class="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                            />
+                            <p id="close-difference-display" class="mt-1.5 text-xs font-medium"></p>
+                        </div>
+                        <div>
+                            <label for="close-register-notes" class="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Descripción / Observaciones</label>
+                            <textarea
+                                id="close-register-notes"
+                                name="closing_notes"
+                                rows="2"
+                                maxlength="500"
+                                placeholder="Inconvenientes: sobrante/faltante justificado, gasto de caja, etc. (opcional)"
+                                class="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                            ></textarea>
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" class="btn-cancel-close-register flex-1 rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700">
+                                Cancelar
+                            </button>
+                            <button type="submit" id="btn-confirm-close-register" class="flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-700">
+                                Cerrar caja
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endcan
+    @endif
+
     {{-- Sale Receipt Modal --}}
-    <div id="receipt-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 backdrop-blur-sm" style="display:none;">
-        <div class="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
+    <div id="receipt-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm" style="display:none;">
+        <div class="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-neutral-900">
             <div class="text-center">
                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400">
                     <i class="fa-solid fa-check text-2xl" aria-hidden="true"></i>
@@ -279,7 +369,6 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const products = @json($productsJson);
@@ -365,7 +454,7 @@
                             text: 'No hay más unidades disponibles.',
                             icon: 'warning',
                             confirmButtonText: 'OK',
-                            confirmButtonColor: '#d97706',
+                            confirmButtonColor: window.SwalColors.warning,
                         });
                         return;
                     }
@@ -540,6 +629,24 @@
                 });
             });
 
+            @if (! $cashRegister)
+                Swal.fire({
+                    title: 'Sin caja abierta',
+                    text: 'No puedes realizar ventas hasta tener una caja abierta a tu cargo. Puedes abrir una tú mismo para comenzar.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Abrir caja ahora',
+                    cancelButtonText: 'Más tarde',
+                    confirmButtonColor: window.SwalColors.warning,
+                    allowOutsideClick: false,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        registerModal.style.display = 'flex';
+                        registerModal.classList.remove('hidden');
+                    }
+                });
+            @endif
+
             document.getElementById('form-open-register').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
@@ -562,18 +669,141 @@
                         cashRegisterOpen = true;
                         registerModal.style.display = 'none';
                         registerModal.classList.add('hidden');
-                        location.reload();
+                        window.notifySuccess('Caja abierta correctamente.');
+                        setTimeout(() => location.reload(), 900);
                     }
                 } catch (err) {
-                    Swal.fire({ title: 'Error', text: 'No se pudo abrir la caja.', icon: 'error' });
+                    Swal.fire({ title: 'Error', text: 'No se pudo abrir la caja.', icon: 'error', confirmButtonText: 'OK', confirmButtonColor: window.SwalColors.danger });
                 }
             });
+
+            // Close cash register from POS
+            const closeRegisterModal = document.getElementById('close-register-modal');
+            const btnCloseRegister = document.getElementById('btn-close-register');
+
+            if (btnCloseRegister && closeRegisterModal) {
+                const closeForm = document.getElementById('form-close-register');
+                const closeAmount = document.getElementById('close-register-amount');
+                const closeDiffDisplay = document.getElementById('close-difference-display');
+                const btnConfirmClose = document.getElementById('btn-confirm-close-register');
+                const theoretical = {{ ($cashSummary['theoretical'] ?? 0) }};
+
+                btnCloseRegister.addEventListener('click', () => {
+                    closeDiffDisplay.textContent = '';
+                    closeRegisterModal.style.display = 'flex';
+                    closeRegisterModal.classList.remove('hidden');
+                    closeAmount.focus();
+                });
+
+                closeRegisterModal.querySelectorAll('.btn-cancel-close-register').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        closeRegisterModal.style.display = 'none';
+                        closeRegisterModal.classList.add('hidden');
+                    });
+                });
+
+                closeRegisterModal.addEventListener('click', (e) => {
+                    if (e.target === closeRegisterModal) {
+                        closeRegisterModal.style.display = 'none';
+                        closeRegisterModal.classList.add('hidden');
+                    }
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && closeRegisterModal.style.display === 'flex') {
+                        closeRegisterModal.style.display = 'none';
+                        closeRegisterModal.classList.add('hidden');
+                    }
+                });
+
+                closeAmount?.addEventListener('input', function () {
+                    if (this.value === '') {
+                        closeDiffDisplay.textContent = '';
+                        return;
+                    }
+                    const diff = (parseFloat(this.value) || 0) - theoretical;
+                    if (diff === 0) {
+                        closeDiffDisplay.textContent = 'Coincide con el monto teórico';
+                        closeDiffDisplay.className = 'mt-1.5 text-xs font-medium text-green-600 dark:text-green-400';
+                    } else if (diff > 0) {
+                        closeDiffDisplay.textContent = `Sobrante: $${diff.toFixed(2)}`;
+                        closeDiffDisplay.className = 'mt-1.5 text-xs font-medium text-blue-600 dark:text-blue-400';
+                    } else {
+                        closeDiffDisplay.textContent = `Faltante: $${Math.abs(diff).toFixed(2)}`;
+                        closeDiffDisplay.className = 'mt-1.5 text-xs font-medium text-red-600 dark:text-red-400';
+                    }
+                });
+
+                closeForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const amount = parseFloat(closeAmount.value);
+                    if (isNaN(amount) || amount < 0) {
+                        Swal.fire({ title: 'Monto inválido', text: 'Ingresa el monto real contado en efectivo.', icon: 'warning', confirmButtonText: 'OK', confirmButtonColor: window.SwalColors.warning });
+                        return;
+                    }
+
+                    const diff = amount - theoretical;
+                    const diffMsg = diff === 0
+                        ? 'El monto coincide con el teórico.'
+                        : diff > 0
+                            ? `Sobrante de $${diff.toFixed(2)} respecto al teórico.`
+                            : `Faltante de $${Math.abs(diff).toFixed(2)} respecto al teórico.`;
+
+                    const result = await Swal.fire({
+                        title: '¿Cerrar caja?',
+                        text: diffMsg,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, cerrar caja',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: window.SwalColors.brand,
+                    });
+
+                    if (!result.isConfirmed) return;
+
+                    btnConfirmClose.disabled = true;
+                    btnConfirmClose.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cerrando...';
+
+                    try {
+                        const resp = await fetch('{{ route("pos.cash-register.close") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                actual_closing_amount: amount,
+                                closing_notes: document.getElementById('close-register-notes').value.trim() || null,
+                            }),
+                        });
+
+                        const data = await resp.json().catch(() => ({}));
+
+                        if (!resp.ok) {
+                            throw new Error(data.error || 'No se pudo cerrar la caja.');
+                        }
+
+                        cashRegisterOpen = false;
+                        closeRegisterModal.style.display = 'none';
+                        closeRegisterModal.classList.add('hidden');
+                        window.notifySuccess('Caja cerrada correctamente.');
+                        setTimeout(() => location.reload(), 900);
+                    } catch (err) {
+                        Swal.fire({ title: 'Error', text: err.message, icon: 'error', confirmButtonText: 'OK', confirmButtonColor: window.SwalColors.danger });
+                    } finally {
+                        btnConfirmClose.disabled = false;
+                        btnConfirmClose.innerHTML = 'Cerrar caja';
+                    }
+                });
+            }
 
             // Complete sale
             btnPay.addEventListener('click', async () => {
                 if (cart.length === 0) return;
                 if (!cashRegisterOpen) {
-                    Swal.fire({ title: 'Caja cerrada', text: 'Debes abrir la caja primero.', icon: 'warning', confirmButtonText: 'OK', confirmButtonColor: '#d97706' });
+                    Swal.fire({ title: 'Sin caja abierta', text: 'No tienes una caja abierta a tu cargo. Ábrela para poder vender.', icon: 'warning', confirmButtonText: 'OK', confirmButtonColor: window.SwalColors.warning });
                     return;
                 }
 
@@ -581,7 +811,7 @@
                 const received = selectedPaymentMethod === 'CASH' ? parseFloat(amountReceived.value) || 0 : total;
 
                 if (selectedPaymentMethod === 'CASH' && received < total) {
-                    Swal.fire({ title: 'Monto insuficiente', text: 'El monto recibido es menor al total.', icon: 'warning', confirmButtonText: 'OK', confirmButtonColor: '#d97706' });
+                    Swal.fire({ title: 'Monto insuficiente', text: 'El monto recibido es menor al total.', icon: 'warning', confirmButtonText: 'OK', confirmButtonColor: window.SwalColors.warning });
                     return;
                 }
 
@@ -625,7 +855,7 @@
                     amountReceived.value = '0';
                     renderCart();
                 } catch (err) {
-                    Swal.fire({ title: 'Error', text: err.message, icon: 'error', confirmButtonText: 'OK', confirmButtonColor: '#dc2626' });
+                    Swal.fire({ title: 'Error', text: err.message, icon: 'error', confirmButtonText: 'OK', confirmButtonColor: window.SwalColors.danger });
                 } finally {
                     btnPay.disabled = false;
                     btnPay.innerHTML = '<i class="fa-solid fa-check-circle" aria-hidden="true"></i> Completar venta';

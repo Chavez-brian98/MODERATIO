@@ -5,24 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductReturn;
 use App\Models\Sale;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ReturnController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $returns = ProductReturn::query()
             ->with(['sale', 'user', 'details.product'])
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $stats = [
-            'total_returns' => $returns->count(),
-            'total_refunded' => $returns->sum('total_returned'),
-            'today_returns' => $returns->filter(fn ($r) => $r->created_at->isToday())->count(),
-            'today_refunded' => $returns->filter(fn ($r) => $r->created_at->isToday())->sum('total_returned'),
+            'total_returns' => ProductReturn::count(),
+            'total_refunded' => ProductReturn::sum('total_returned'),
+            'today_returns' => ProductReturn::whereDate('created_at', today())->count(),
+            'today_refunded' => ProductReturn::whereDate('created_at', today())->sum('total_returned'),
         ];
 
         return view('modules.returns.index', [
@@ -64,6 +68,8 @@ class ReturnController extends Controller
             'created_at' => now(),
         ]);
 
+        $productDetails = [];
+
         foreach ($validated['products'] as $item) {
             $return->details()->create([
                 'product_id' => $item['product_id'],
@@ -73,7 +79,20 @@ class ReturnController extends Controller
 
             Product::where('id', $item['product_id'])
                 ->increment('current_stock', $item['quantity']);
+
+            $productDetails[] = [
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'subtotal' => $item['subtotal'],
+            ];
         }
+
+        AuditService::log('CREATED', 'returns', $return->id, [
+            'sale_id' => $validated['sale_id'],
+            'reason' => $validated['reason'],
+            'total_returned' => $totalReturned,
+            'products' => $productDetails,
+        ]);
 
         return redirect()->route('returns.show', $return)
             ->with('success', 'Devolución registrada correctamente.');

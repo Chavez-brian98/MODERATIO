@@ -24,13 +24,14 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'role_id' => 1,
             'full_name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
             'address' => fake()->address(),
             'DUI' => null,
-            'birthday' => fake()->optional()->dateTimeBetween('-60 years', '-18 years')->format('Y-m-d'),
+            'birthday' => fake()->boolean(80)
+                ? fake()->dateTimeBetween('-60 years', '-18 years')->format('Y-m-d')
+                : null,
             'is_active' => true,
         ];
     }

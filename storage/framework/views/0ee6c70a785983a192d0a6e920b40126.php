@@ -91,9 +91,9 @@
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
                     <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Rol</dt>
                     <dd>
-                        <?php if($employee->role): ?>
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo e($roleBadges[$employee->role->name] ?? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'); ?>">
-                                <?php echo e($roleLabels[$employee->role->name] ?? $employee->role->name); ?>
+                        <?php if($employee->roles->first()): ?>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo e($roleBadges[$employee->roles->first()->name] ?? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'); ?>">
+                                <?php echo e($roleLabels[$employee->roles->first()->name] ?? $employee->roles->first()->name); ?>
 
                             </span>
                         <?php else: ?>
@@ -101,10 +101,10 @@
                         <?php endif; ?>
                     </dd>
                 </div>
-                <?php if($employee->role?->description): ?>
+                <?php if($employee->roles->first()?->description): ?>
                     <div class="flex items-center justify-between gap-6 px-4 py-3">
                         <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Descripción del rol</dt>
-                        <dd class="text-right text-sm text-neutral-900 dark:text-white"><?php echo e($employee->role->description); ?></dd>
+                        <dd class="text-right text-sm text-neutral-900 dark:text-white"><?php echo e($employee->roles->first()->description); ?></dd>
                     </div>
                 <?php endif; ?>
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
@@ -136,11 +136,18 @@
                 </div>
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
                     <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Fecha de contratación</dt>
-                    <dd class="text-right text-sm text-neutral-900 dark:text-white"><?php echo e($employee->created_at->format('d/m/Y \a\s H:i')); ?></dd>
+                    <dd class="text-right text-sm text-neutral-900 dark:text-white"><?php echo e($employee->created_at->format('d/m/Y \a \l\a\s H:i')); ?></dd>
                 </div>
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
-                    <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Última actualización</dt>
-                    <dd class="text-right text-sm text-neutral-900 dark:text-white"><?php echo e($employee->updated_at->format('d/m/Y \a\s H:i')); ?></dd>
+                    <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Editado por última vez</dt>
+                    <dd class="text-right text-sm text-neutral-900 dark:text-white">
+                        <?php if($employee->updated_at->equalTo($employee->created_at)): ?>
+                            —
+                        <?php else: ?>
+                            <?php echo e($employee->updated_at->format('d/m/Y \a \l\a\s H:i')); ?>
+
+                        <?php endif; ?>
+                    </dd>
                 </div>
             </dl>
         </div>

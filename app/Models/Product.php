@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    protected static function booted(): void
+    {
+        static::created(fn (Product $product) => $product->updateQuietly(['updated_at' => null]));
+    }
+
     protected $fillable = [
         'category_id', 'barcode', 'name', 'description', 'purchase_price', 'sale_price',
         'current_stock', 'min_stock', 'has_tax', 'tax_percentage', 'is_active',

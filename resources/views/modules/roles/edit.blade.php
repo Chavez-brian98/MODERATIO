@@ -85,6 +85,34 @@
                     </label>
                 </div>
 
+                <div>
+                    <label for="default_route" class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        Ruta por defecto al iniciar sesión
+                    </label>
+                    <select
+                        id="default_route"
+                        name="default_route"
+                        class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                    >
+                        <option value="">Usar redirección automática</option>
+                        <option value="dashboard" {{ old('default_route', $role->default_route) === 'dashboard' ? 'selected' : '' }}>Dashboard</option>
+                        <option value="pos" {{ old('default_route', $role->default_route) === 'pos' ? 'selected' : '' }}>POS (Punto de Venta)</option>
+                        <option value="inventory.index" {{ old('default_route', $role->default_route) === 'inventory.index' ? 'selected' : '' }}>Inventario</option>
+                        <option value="categories.index" {{ old('default_route', $role->default_route) === 'categories.index' ? 'selected' : '' }}>Categorías</option>
+                        <option value="employees.index" {{ old('default_route', $role->default_route) === 'employees.index' ? 'selected' : '' }}>Empleados</option>
+                        <option value="roles.index" {{ old('default_route', $role->default_route) === 'roles.index' ? 'selected' : '' }}>Roles y Permisos</option>
+                        <option value="cash-register.index" {{ old('default_route', $role->default_route) === 'cash-register.index' ? 'selected' : '' }}>Caja / Arqueo</option>
+                        <option value="returns.index" {{ old('default_route', $role->default_route) === 'returns.index' ? 'selected' : '' }}>Devoluciones</option>
+                        <option value="reports.index" {{ old('default_route', $role->default_route) === 'reports.index' ? 'selected' : '' }}>Reportes</option>
+                        <option value="audit.index" {{ old('default_route', $role->default_route) === 'audit.index' ? 'selected' : '' }}>Bitácora</option>
+                        <option value="settings.index" {{ old('default_route', $role->default_route) === 'settings.index' ? 'selected' : '' }}>Configuración</option>
+                    </select>
+                    <p class="mt-1.5 text-xs text-neutral-400 dark:text-neutral-500">Página a la que se redirige al usuario tras iniciar sesión. Si se deja vacío, se usará la redirección automática según permisos.</p>
+                    @error('default_route')
+                        <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div class="flex flex-col-reverse gap-3 border-t border-brand-100 pt-6 dark:border-neutral-800 sm:flex-row sm:justify-end">
                     <a
                         href="{{ route('roles.index') }}"

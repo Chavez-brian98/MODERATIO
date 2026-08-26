@@ -96,6 +96,41 @@ unset($__errorArgs, $__bag); ?>
                     </label>
                 </div>
 
+                <div>
+                    <label for="default_route" class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        Ruta por defecto al iniciar sesión
+                    </label>
+                    <select
+                        id="default_route"
+                        name="default_route"
+                        class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                    >
+                        <option value="">Usar redirección automática</option>
+                        <option value="dashboard" <?php echo e(old('default_route') === 'dashboard' ? 'selected' : ''); ?>>Dashboard</option>
+                        <option value="pos" <?php echo e(old('default_route') === 'pos' ? 'selected' : ''); ?>>POS (Punto de Venta)</option>
+                        <option value="inventory.index" <?php echo e(old('default_route') === 'inventory.index' ? 'selected' : ''); ?>>Inventario</option>
+                        <option value="categories.index" <?php echo e(old('default_route') === 'categories.index' ? 'selected' : ''); ?>>Categorías</option>
+                        <option value="employees.index" <?php echo e(old('default_route') === 'employees.index' ? 'selected' : ''); ?>>Empleados</option>
+                        <option value="roles.index" <?php echo e(old('default_route') === 'roles.index' ? 'selected' : ''); ?>>Roles y Permisos</option>
+                        <option value="cash-register.index" <?php echo e(old('default_route') === 'cash-register.index' ? 'selected' : ''); ?>>Caja / Arqueo</option>
+                        <option value="returns.index" <?php echo e(old('default_route') === 'returns.index' ? 'selected' : ''); ?>>Devoluciones</option>
+                        <option value="reports.index" <?php echo e(old('default_route') === 'reports.index' ? 'selected' : ''); ?>>Reportes</option>
+                        <option value="audit.index" <?php echo e(old('default_route') === 'audit.index' ? 'selected' : ''); ?>>Bitácora</option>
+                        <option value="settings.index" <?php echo e(old('default_route') === 'settings.index' ? 'selected' : ''); ?>>Configuración</option>
+                    </select>
+                    <p class="mt-1.5 text-xs text-neutral-400 dark:text-neutral-500">Página a la que se redirige al usuario tras iniciar sesión. Si se deja vacío, se usará la redirección automática según permisos.</p>
+                    <?php $__errorArgs = ['default_route'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
                 <div class="flex flex-col-reverse gap-3 border-t border-brand-100 pt-6 dark:border-neutral-800 sm:flex-row sm:justify-end">
                     <a
                         href="<?php echo e(route('roles.index')); ?>"
@@ -139,4 +174,4 @@ unset($__errorArgs, $__bag); ?>
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views/modules/roles/create.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views\modules\roles\create.blade.php ENDPATH**/ ?>

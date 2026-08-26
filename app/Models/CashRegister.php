@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CashRegister extends Model
 {
-    const CREATED_AT = null;
-
-    const UPDATED_AT = null;
+    protected static function booted(): void
+    {
+        static::created(fn (CashRegister $register) => $register->updateQuietly(['updated_at' => null]));
+    }
 
     protected $fillable = [
-        'user_id', 'shift', 'opening_amount', 'theoretical_closing_amount',
-        'actual_closing_amount', 'difference', 'status', 'opening_date', 'closing_date',
+        'user_id', 'responsible_id', 'shift', 'opening_amount', 'theoretical_closing_amount',
+        'actual_closing_amount', 'difference', 'closing_notes', 'status', 'opening_date', 'closing_date',
     ];
 
     protected function casts(): array
@@ -32,6 +33,11 @@ class CashRegister extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function responsible(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_id');
     }
 
     public function sales(): HasMany

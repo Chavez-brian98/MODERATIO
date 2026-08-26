@@ -91,11 +91,11 @@
                 </div>
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
                     <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Fecha de creación</dt>
-                    <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $role->created_at->format('d/m/Y \a\s H:i') }}</dd>
+                    <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $role->created_at->format('d/m/Y \a \l\a\s H:i') }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-6 px-4 py-3">
                     <dt class="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">Última actualización</dt>
-                    <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $role->updated_at->format('d/m/Y \a\s H:i') }}</dd>
+                    <dd class="text-right text-sm text-neutral-900 dark:text-white">{{ $role->updated_at->format('d/m/Y \a \l\a\s H:i') }}</dd>
                 </div>
             </dl>
         </div>

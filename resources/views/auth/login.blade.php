@@ -42,8 +42,12 @@
                             autocomplete="email"
                             required
                             autofocus
-                            class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                            value="{{ old('email') }}"
+                            class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 @error('email') border-red-400 focus:border-red-500 focus:ring-red-500/20 @enderror"
                         />
+                        @error('email')
+                            <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
@@ -55,8 +59,11 @@
                             type="password"
                             autocomplete="current-password"
                             required
-                            class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                            class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 @error('password') border-red-400 focus:border-red-500 focus:ring-red-500/20 @enderror"
                         />
+                        @error('password')
+                            <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                         <div class="mt-2 flex justify-end">
                             <a
                                 href="#"

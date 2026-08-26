@@ -11,6 +11,10 @@
             'TOGGLED' => 'Cambio de estado',
             'LOGIN' => 'Inicio de sesión',
             'LOGOUT' => 'Cierre de sesión',
+            'OPENED' => 'Apertura',
+            'CLOSED' => 'Cierre',
+            'SALE_COMPLETED' => 'Venta realizada',
+            'PERMISSIONS_UPDATED' => 'Permisos actualizados',
         ];
         $actionBadges = [
             'CREATED' => 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-400',
@@ -19,6 +23,10 @@
             'TOGGLED' => 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
             'LOGIN' => 'bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400',
             'LOGOUT' => 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400',
+            'OPENED' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+            'CLOSED' => 'bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400',
+            'SALE_COMPLETED' => 'bg-violet-50 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
+            'PERMISSIONS_UPDATED' => 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-400',
         ];
         $tableLabels = [
             'users' => 'Empleados',
@@ -29,37 +37,9 @@
             'sale_details' => 'Detalle de ventas',
             'cash_registers' => 'Cajas',
             'customers' => 'Clientes',
-        ];
-
-        $todayCount = $logs->filter(fn ($log) => $log->created_at->isToday())->count();
-        $mostActiveUser = $logs->where('user_id', '!=', null)->pluck('user')->filter()->groupBy('full_name')->sortByDesc(fn ($group) => $group->count())->keys()->first() ?? '—';
-        $mostAffectedTable = $logs->groupBy('affected_table')->sortByDesc(fn ($group) => $group->count())->keys()->first() ?? '—';
-
-        $stats = [
-            [
-                'label' => 'Total de registros',
-                'value' => $logs->count(),
-                'sub' => 'En la bitácora',
-                'path' => 'M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z',
-            ],
-            [
-                'label' => 'Registros hoy',
-                'value' => $todayCount,
-                'sub' => now()->isoFormat('D MMMM YYYY'),
-                'path' => 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
-            ],
-            [
-                'label' => 'Usuario más activo',
-                'value' => $mostActiveUser,
-                'sub' => 'Mayor cantidad de acciones',
-                'path' => 'M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z',
-            ],
-            [
-                'label' => 'Tabla más afectada',
-                'value' => $tableLabels[$mostAffectedTable] ?? $mostAffectedTable,
-                'sub' => 'Más registros modificados',
-                'path' => 'M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z',
-            ],
+            'returns' => 'Devoluciones',
+            'settings' => 'Configuración',
+            'user_has_permissions' => 'Permisos de usuario',
         ];
     @endphp
 
@@ -74,43 +54,25 @@
         </div>
     </header>
 
-    <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        @foreach ($stats as $stat)
-            <div class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="{{ $stat['path'] }}" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="truncate text-sm text-neutral-500 dark:text-neutral-400">{{ $stat['label'] }}</p>
-                        <p class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white sm:text-2xl">{{ $stat['value'] }}</p>
-                        <p class="text-xs text-neutral-400 dark:text-neutral-500">{{ $stat['sub'] }}</p>
-                    </div>
-                </div>
+    <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="audit-search"
+                    placeholder="Buscar en la bitácora..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
             </div>
-        @endforeach
-    </section>
 
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative w-full sm:max-w-sm">
-            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input
-                type="search"
-                id="audit-search"
-                placeholder="Buscar en la bitácora..."
-                autocomplete="off"
-                class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
-            />
-        </div>
-
-        <div class="flex flex-wrap gap-2">
             <select
                 id="audit-filter-action"
-                class="rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                aria-label="Filtrar por acción"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             >
                 <option value="">Todas las acciones</option>
                 <option value="CREATED">Creación</option>
@@ -123,7 +85,8 @@
 
             <select
                 id="audit-filter-table"
-                class="rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                aria-label="Filtrar por tabla"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             >
                 <option value="">Todas las tablas</option>
                 @foreach ($logs->pluck('affected_table')->unique()->sort() as $table)
@@ -131,11 +94,50 @@
                 @endforeach
             </select>
         </div>
+
+        <form
+            method="GET"
+            action="{{ route('audit.index') }}"
+            class="flex flex-col gap-3 sm:flex-row sm:items-center"
+        >
+            <input
+                type="date"
+                id="date_from"
+                name="date_from"
+                value="{{ $filters['date_from'] }}"
+                max="{{ $filters['date_to'] }}"
+                aria-label="Fecha desde"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            />
+            <input
+                type="date"
+                id="date_to"
+                name="date_to"
+                value="{{ $filters['date_to'] }}"
+                min="{{ $filters['date_from'] }}"
+                aria-label="Fecha hasta"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            />
+            <div class="flex items-center gap-2">
+                <button
+                    type="submit"
+                    class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+                >
+                    <i class="fa-solid fa-filter text-xs" aria-hidden="true"></i> Filtrar
+                </button>
+                <a
+                    href="{{ route('audit.index') }}"
+                    class="inline-flex shrink-0 items-center gap-1 rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm font-medium text-neutral-700 shadow-sm transition-colors hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                >
+                    <i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i> Limpiar
+                </a>
+            </div>
+        </form>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -185,14 +187,15 @@
                             {{ $log->source_ip ?? '—' }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right sm:px-6">
-                            <button
-                                type="button"
-                                title="Ver detalle"
-                                data-view-audit="{{ route('audit.show', $log) }}"
-                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm ml-auto dark:text-brand-400 dark:hover:bg-brand-900/40"
-                            >
-                                <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
-                            </button>
+                            <div class="flex items-center justify-end">
+                                <a
+                                    href="{{ route('audit.show', $log) }}"
+                                    title="Ver detalle"
+                                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm dark:text-brand-400 dark:hover:bg-brand-900/40"
+                                >
+                                    <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @empty
@@ -218,9 +221,9 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <div id="audit-modal-container" aria-hidden="true"></div>
+        @include('partials.pagination', ['paginator' => $logs])
+    </div>
 @endsection
 
 @section('scripts')
@@ -258,78 +261,6 @@
             searchInput.addEventListener('input', applyFilters);
             filterAction.addEventListener('change', applyFilters);
             filterTable.addEventListener('change', applyFilters);
-
-            const modalContainer = document.getElementById('audit-modal-container');
-            const modalTrigger = { element: null };
-
-            const closeAuditModal = () => {
-                modalContainer.innerHTML = '';
-                modalContainer.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('overflow-hidden');
-                modalTrigger.element?.focus();
-            };
-
-            document.querySelectorAll('[data-view-audit]').forEach((button) => {
-                button.addEventListener('click', async () => {
-                    modalTrigger.element = document.activeElement;
-                    modalContainer.innerHTML = '';
-
-                    try {
-                        const response = await fetch(button.dataset.viewAudit, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'text/html',
-                            },
-                        });
-
-                        if (!response.ok) return;
-
-                        modalContainer.innerHTML = await response.text();
-
-                        const modal = modalContainer.querySelector('[data-audit-modal]');
-                        if (!modal) {
-                            closeAuditModal();
-                            return;
-                        }
-
-                        modalContainer.setAttribute('aria-hidden', 'false');
-                        document.body.classList.add('overflow-hidden');
-
-                        const focusable = modal.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
-                        const firstFocusable = focusable[0];
-                        const lastFocusable = focusable[focusable.length - 1];
-                        firstFocusable?.focus();
-
-                        modal.addEventListener('click', (event) => {
-                            if (event.target === modal.querySelector('[data-modal-backdrop]')) {
-                                closeAuditModal();
-                            }
-                        });
-
-                        modal.addEventListener('keydown', (event) => {
-                            if (event.key === 'Escape') {
-                                closeAuditModal();
-                                return;
-                            }
-                            if (event.key === 'Tab' && focusable.length > 0) {
-                                if (event.shiftKey && document.activeElement === firstFocusable) {
-                                    event.preventDefault();
-                                    lastFocusable.focus();
-                                } else if (!event.shiftKey && document.activeElement === lastFocusable) {
-                                    event.preventDefault();
-                                    firstFocusable.focus();
-                                }
-                            }
-                        });
-
-                        modal.querySelectorAll('[data-modal-close]').forEach((element) => {
-                            element.addEventListener('click', closeAuditModal);
-                        });
-                    } catch (error) {
-                        closeAuditModal();
-                    }
-                });
-            });
         });
     </script>
 @endsection

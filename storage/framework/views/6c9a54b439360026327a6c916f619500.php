@@ -16,7 +16,7 @@
         $stats = [
             [
                 'label' => 'Categorías creadas',
-                'value' => $categories->count(),
+                'value' => $categories->total(),
                 'sub' => 'Total registradas',
                 'path' => 'M12 2.25 21 6.75l-9 4.5-9-4.5 9-4.5Zm-9 9 9 4.5 9-4.5M3.75 15.75 12 20.25l8.25-4.5',
             ],
@@ -54,32 +54,60 @@
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </section>
 
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative w-full sm:max-w-sm">
-            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input
-                type="search"
-                id="category-search"
-                placeholder="Buscar categoría..."
-                autocomplete="off"
-                class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
-            />
+    <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="category-search"
+                    placeholder="Buscar categoría..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
+
+            <form method="GET" action="<?php echo e(route('categories.index')); ?>" id="category-filters-form" class="flex items-center gap-2">
+                <select
+                    name="type"
+                    aria-label="Filtrar por tipo"
+                    onchange="this.form.submit()"
+                    class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                >
+                    <option value="all" <?php echo e($type === 'all' ? 'selected' : ''); ?>>Todas las categorías</option>
+                    <option value="parent" <?php echo e($type === 'parent' ? 'selected' : ''); ?>>Solo principales (padre)</option>
+                    <option value="sub" <?php echo e($type === 'sub' ? 'selected' : ''); ?>>Solo subcategorías</option>
+                </select>
+
+                <select
+                    name="status"
+                    aria-label="Filtrar por estado"
+                    onchange="this.form.submit()"
+                    class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                >
+                    <option value="all" <?php echo e($status === 'all' ? 'selected' : ''); ?>>Cualquier estado</option>
+                    <option value="active" <?php echo e($status === 'active' ? 'selected' : ''); ?>>Solo activas</option>
+                    <option value="inactive" <?php echo e($status === 'inactive' ? 'selected' : ''); ?>>Solo inactivas</option>
+                </select>
+            </form>
         </div>
 
-        <a
-            href="<?php echo e(route('categories.create')); ?>"
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
-        >
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Nueva categoría
-        </a>
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('categories_create')): ?>
+            <a
+                href="<?php echo e(route('categories.create')); ?>"
+                class="ml-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                Nueva categoría
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -145,44 +173,48 @@
                                     </button>
                                 <?php endif; ?>
 
-                                <?php if(Route::has('categories.edit')): ?>
-                                    <a
-                                        href="<?php echo e(route('categories.edit', $category)); ?>"
-                                        title="Editar"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
-                                    </a>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('categories_edit')): ?>
+                                    <?php if(Route::has('categories.edit')): ?>
+                                        <a
+                                            href="<?php echo e(route('categories.edit', $category)); ?>"
+                                            title="Editar"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
+                                        >
+                                            <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if($category->is_active && Route::has('categories.toggle')): ?>
+                                        <form method="POST" action="<?php echo e(route('categories.toggle', $category)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('PATCH'); ?>
+                                            <button
+                                                type="submit"
+                                                data-disable-category
+                                                title="Deshabilitar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
-                                <?php if($category->is_active && Route::has('categories.toggle')): ?>
-                                    <form method="POST" action="<?php echo e(route('categories.toggle', $category)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('PATCH'); ?>
-                                        <button
-                                            type="submit"
-                                            data-disable-category
-                                            title="Deshabilitar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
-                                        >
-                                            <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-
-                                <?php if(! $category->is_active && Route::has('categories.destroy')): ?>
-                                    <form method="POST" action="<?php echo e(route('categories.destroy', $category)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button
-                                            type="submit"
-                                            data-delete-category
-                                            title="Eliminar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
-                                        >
-                                            <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('categories_delete')): ?>
+                                    <?php if(! $category->is_active && Route::has('categories.destroy')): ?>
+                                        <form method="POST" action="<?php echo e(route('categories.destroy', $category)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
+                                            <button
+                                                type="submit"
+                                                data-delete-category
+                                                title="Eliminar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -210,13 +242,14 @@
                 </tbody>
             </table>
         </div>
+
+        <?php echo $__env->make('partials.pagination', ['paginator' => $categories], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
     <div id="category-modal-container" aria-hidden="true"></div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('scripts'); ?>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('category-search');
@@ -255,7 +288,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Sí, deshabilitar',
                         cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#d97706',
+                        confirmButtonColor: window.SwalColors.brand,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
@@ -276,7 +309,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Sí, eliminar',
                         cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#dc2626',
+                        confirmButtonColor: window.SwalColors.danger,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
@@ -362,5 +395,4 @@
         });
     </script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views/modules/categories/index.blade.php ENDPATH**/ ?>
