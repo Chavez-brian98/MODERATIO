@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuditService;
+use App\Services\CashRegisterService;
 use App\Services\PosService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,12 +13,28 @@ class PosController extends Controller
 {
     public function __construct(
         private readonly PosService $posService,
+        private readonly CashRegisterService $cashRegisterService,
     ) {}
 
     public function index(): View
     {
         $products = $this->posService->getActiveProducts();
-        $cashRegister = $this->posService->getOpenCashRegister();
+        $cashRegister = $this->posService->getOpenCashRegisterForUser((int) auth()->id());
+
+        $cashSummary = null;
+
+        if ($cashRegister !== null) {
+            $cashSales = (float) $cashRegister->sales()
+                ->notCancelled()
+                ->where('payment_method', 'CASH')
+                ->sum('total');
+
+            $cashSummary = [
+                'opening_amount' => (float) $cashRegister->opening_amount,
+                'cash_sales' => $cashSales,
+                'theoretical' => round((float) $cashRegister->opening_amount + $cashSales, 2),
+            ];
+        }
 
         $productsJson = $products->map(fn ($p) => [
             'id' => $p->id,
@@ -35,6 +53,7 @@ class PosController extends Controller
             'products' => $products,
             'productsJson' => $productsJson,
             'cashRegister' => $cashRegister,
+            'cashSummary' => $cashSummary,
         ]);
     }
 
@@ -64,12 +83,52 @@ class PosController extends Controller
         ]);
 
         $register = $this->posService->openCashRegister(
-            userId: 1,
+            userId: (int) auth()->id(),
             openingAmount: $validated['opening_amount'],
             shift: $validated['shift'],
         );
 
+        AuditService::log('OPENED', 'cash_registers', $register->id, [
+            'opening_amount' => $register->opening_amount,
+            'shift' => $register->shift,
+        ]);
+
         return response()->json($register);
+    }
+
+    public function closeCashRegister(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'actual_closing_amount' => ['required', 'numeric', 'min:0'],
+            'closing_notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $cashRegister = $this->posService->getOpenCashRegisterForUser((int) auth()->id());
+
+        if ($cashRegister === null) {
+            return response()->json([
+                'error' => 'No tienes una caja abierta a tu cargo para cerrar.',
+            ], 422);
+        }
+
+        $register = $this->cashRegisterService->close(
+            register: $cashRegister,
+            actualClosingAmount: (float) $validated['actual_closing_amount'],
+            notes: $validated['closing_notes'] ?? null,
+        );
+
+        AuditService::log('CLOSED', 'cash_registers', $register->id, [
+            'opening_amount' => $register->opening_amount,
+            'theoretical_closing_amount' => $register->theoretical_closing_amount,
+            'actual_closing_amount' => $register->actual_closing_amount,
+            'difference' => $register->difference,
+            'closing_notes' => $register->closing_notes,
+        ]);
+
+        return response()->json([
+            'message' => 'Caja cerrada correctamente.',
+            'register' => $register,
+        ]);
     }
 
     public function completeSale(Request $request): JsonResponse
@@ -87,15 +146,30 @@ class PosController extends Controller
         ]);
 
         try {
+            $cashRegister = $this->posService->getOpenCashRegisterForUser((int) auth()->id());
+
+            if ($cashRegister === null) {
+                return response()->json([
+                    'error' => 'No tienes una caja abierta a tu cargo. Debes abrir una caja antes de poder vender.',
+                ], 422);
+            }
+
             $sale = $this->posService->completeSale(
                 items: $validated['items'],
-                userId: 1,
-                cashRegisterId: $this->posService->getOpenCashRegister()?->id,
+                userId: (int) auth()->id(),
+                cashRegisterId: $cashRegister->id,
                 customerId: $validated['customer_id'] ?? null,
                 paymentMethod: $validated['payment_method'],
                 amountReceived: $validated['amount_received'],
                 observations: $validated['observations'] ?? null,
             );
+
+            AuditService::log('SALE_COMPLETED', 'sales', $sale->id, [
+                'ticket_number' => $sale->ticket_number,
+                'total' => $sale->total,
+                'payment_method' => $sale->payment_method,
+                'items_count' => count($validated['items']),
+            ]);
 
             return response()->json(['sale' => $sale]);
         } catch (\RuntimeException $e) {

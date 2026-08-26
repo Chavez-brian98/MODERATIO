@@ -4,18 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\AuditService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class InventoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $perPage = $request->integer('per_page', 10);
+
         $products = Product::query()
             ->with('category')
             ->orderBy('name')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $stats = [
             'total' => Product::count(),
@@ -29,9 +34,12 @@ class InventoryController extends Controller
                 ->count(),
         ];
 
+        $categories = Category::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+
         return view('modules.inventory.index', [
             'products' => $products,
             'stats' => $stats,
+            'categories' => $categories,
         ]);
     }
 
@@ -64,7 +72,7 @@ class InventoryController extends Controller
             $validated['tax_percentage'] = 0;
         }
 
-        Product::create($validated);
+        $product = Product::create($validated);
 
         return redirect()->route('inventory.index')
             ->with('success', 'Producto creado correctamente.');
@@ -119,15 +127,22 @@ class InventoryController extends Controller
     public function toggleActive(Product $product): RedirectResponse
     {
         $product->is_active = ! $product->is_active;
-        $product->save();
 
-        return redirect()->route('inventory.index');
+        Model::withoutEvents(fn () => $product->save());
+
+        AuditService::log('TOGGLED', 'products', $product->id, [
+            'is_active' => $product->is_active,
+        ]);
+
+        return redirect()->route('inventory.index')
+            ->with('success', $product->is_active ? 'Producto activado correctamente.' : 'Producto desactivado correctamente.');
     }
 
     public function destroy(Product $product): RedirectResponse
     {
         $product->delete();
 
-        return redirect()->route('inventory.index');
+        return redirect()->route('inventory.index')
+            ->with('success', 'Producto eliminado correctamente.');
     }
 }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2);
             $table->decimal('amount_received', 10, 2);
             $table->decimal('change_due', 10, 2);
-            $table->enum('payment_method', ['CASH', 'CARD', 'TRANSFER'])->default('CASH');
+            $table->enum('payment_method', ['CASH', 'CARD', 'TRANSFER', 'MIXED'])->default('CASH');
             $table->enum('status', ['COMPLETED', 'CANCELLED', 'PARTIALLY_RETURNED'])->default('COMPLETED');
             $table->text('observations')->nullable();
             $table->timestamp('created_at')->useCurrent();

@@ -186,7 +186,13 @@ unset($__errorArgs, $__bag); ?>
             const total = parseFloat(document.getElementById('summary-total').textContent.replace('$', '')) || 0;
             if (total <= 0) {
                 e.preventDefault();
-                alert('Selecciona al menos un producto para devolver.');
+                Swal.fire({
+                    title: 'Sin productos seleccionados',
+                    text: 'Selecciona al menos un producto para devolver.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: window.SwalColors.warning,
+                });
                 return false;
             }
             return true;

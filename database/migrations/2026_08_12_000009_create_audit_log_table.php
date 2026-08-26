@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('affected_table', 50);
             $table->unsignedBigInteger('record_id')->nullable();
             $table->json('details')->nullable();
+            $table->json('old_values')->nullable();
+            $table->json('new_values')->nullable();
             $table->string('source_ip', 45)->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->index('created_at', 'idx_audit_date');

@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
+    protected static function booted(): void
+    {
+        static::created(fn (Customer $customer) => $customer->updateQuietly(['updated_at' => null]));
+    }
+
     protected $fillable = [
         'first_name', 'last_name', 'tax_id', 'phone', 'email',
         'address', 'customer_type', 'is_active',

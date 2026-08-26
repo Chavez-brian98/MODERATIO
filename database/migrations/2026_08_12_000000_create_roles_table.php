@@ -10,22 +10,17 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->enum('name', ['ADMINISTRATOR', 'CASHIER', 'WAREHOUSE'])->unique();
+            $table->string('name', 100)->unique();
             $table->string('description', 255)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_super_admin')->default(false);
+            $table->string('default_route', 100)->nullable();
             $table->timestamps();
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('role_id')->references('id')->on('roles');
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id']);
-        });
-
         Schema::dropIfExists('roles');
     }
 };

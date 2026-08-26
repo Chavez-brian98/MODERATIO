@@ -10,12 +10,6 @@
         <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Ajustes generales del negocio y del sistema.</p>
     </div>
 
-    @if (session('success'))
-        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
-            <i class="fa-solid fa-check-circle mr-1"></i> {{ session('success') }}
-        </div>
-    @endif
-
     <form method="POST" action="{{ route('settings.update') }}">
         @csrf
         @method('PUT')

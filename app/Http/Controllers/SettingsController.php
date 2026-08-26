@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,7 +36,14 @@ class SettingsController extends Controller
             'receipt_footer' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $before = $this->load();
+
         file_put_contents($this->configPath, json_encode($validated, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        AuditService::log('UPDATED', 'settings', null, [
+            'before' => $before,
+            'after' => $validated,
+        ]);
 
         return redirect()->route('settings.index')
             ->with('success', 'Configuración actualizada correctamente.');

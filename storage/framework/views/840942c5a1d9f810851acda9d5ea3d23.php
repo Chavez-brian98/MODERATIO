@@ -55,30 +55,73 @@
         </div>
     </div>
 
-    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative flex-1 sm:max-w-xs">
-            <i class="fa-solid fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
-            <input
-                type="text"
-                id="inventory-search"
-                placeholder="Buscar por nombre, código o categoría..."
-                class="w-full rounded-xl border border-brand-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder:text-neutral-500"
-            />
+    <div class="mt-6 mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="inventory-search"
+                    placeholder="Buscar por nombre, código o categoría..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
+
+            <select
+                id="filter-category"
+                aria-label="Filtrar por categoría"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todas las categorías</option>
+                <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($category->name); ?>"><?php echo e($category->name); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
+
+            <select
+                id="filter-stock"
+                aria-label="Filtrar por stock"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todo el stock</option>
+                <option value="in">Con stock</option>
+                <option value="low">Stock bajo</option>
+                <option value="out">Sin stock</option>
+            </select>
+
+            <select
+                id="filter-status"
+                aria-label="Filtrar por estado"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todos los estados</option>
+                <option value="1">Activos</option>
+                <option value="0">Inactivos</option>
+            </select>
         </div>
-        <a href="<?php echo e(route('inventory.create')); ?>" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 active:bg-brand-800">
-            <i class="fa-solid fa-plus text-xs"></i> Nuevo Producto
-        </a>
+
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('products_create')): ?>
+            <a
+                href="<?php echo e(route('inventory.create')); ?>"
+                class="ml-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Nuevo Producto
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-sm" role="grid">
                 <thead>
                     <tr class="border-b border-brand-100 bg-brand-50/60 dark:border-neutral-700 dark:bg-neutral-800/60">
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Producto</th>
                         <th class="hidden px-4 py-3 font-semibold text-brand-800 sm:table-cell dark:text-brand-200">Código</th>
                         <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Categoría</th>
-                        <th class="hidden px-4 py-3 font-semibold text-brand-800 md:table-cell dark:text-brand-200">Precio Compra</th>
+                        <th class="hidden px-4 py-3 font-semibold text-brand-800 lg:table-cell dark:text-brand-200">Precio Compra</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Precio Venta</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Stock</th>
                         <th class="px-4 py-3 font-semibold text-brand-800 dark:text-brand-200">Estado</th>
@@ -87,7 +130,7 @@
                 </thead>
                 <tbody id="inventory-tbody" class="divide-y divide-neutral-100 dark:divide-neutral-800">
                     <?php $__empty_1 = true; $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40" data-search="<?php echo e(strtolower($product->name . ' ' . ($product->barcode ?? '') . ' ' . $product->category->name)); ?>">
+                        <tr class="transition-colors hover:bg-brand-50/40 dark:hover:bg-neutral-800/40" data-search="<?php echo e(strtolower($product->name . ' ' . ($product->barcode ?? '') . ' ' . $product->category->name)); ?>" data-category="<?php echo e($product->category->name); ?>" data-stock="<?php echo e($product->current_stock); ?>" data-min-stock="<?php echo e($product->min_stock); ?>" data-active="<?php echo e($product->is_active ? '1' : '0'); ?>">
                             <td class="px-4 py-3">
                                 <div class="font-medium text-neutral-800 dark:text-neutral-200"><?php echo e($product->name); ?></div>
                                 <?php if($product->has_tax): ?>
@@ -96,7 +139,7 @@
                             </td>
                             <td class="hidden px-4 py-3 sm:table-cell font-mono text-xs dark:text-neutral-400"><?php echo e($product->barcode ?? '—'); ?></td>
                             <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300"><?php echo e($product->category->name); ?></td>
-                            <td class="hidden px-4 py-3 md:table-cell dark:text-neutral-300">$<?php echo e(number_format($product->purchase_price, 2)); ?></td>
+                            <td class="hidden px-4 py-3 lg:table-cell dark:text-neutral-300">$<?php echo e(number_format($product->purchase_price, 2)); ?></td>
                             <td class="px-4 py-3 font-semibold text-neutral-800 dark:text-neutral-100">$<?php echo e(number_format($product->sale_price, 2)); ?></td>
                             <td class="px-4 py-3">
                                 <?php if($product->current_stock <= 0): ?>
@@ -128,35 +171,48 @@
                                 <?php endif; ?>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center gap-1">
-                                    <a href="<?php echo e(route('inventory.show', $product)); ?>" class="inline-flex items-center justify-center rounded-lg p-2 text-brand-600 transition-colors hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-neutral-800" title="Ver">
-                                        <i class="fa-solid fa-eye text-xs"></i>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a href="<?php echo e(route('inventory.show', $product)); ?>" title="Ver detalle" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-700 transition-all hover:scale-110 hover:bg-brand-100 hover:shadow-sm dark:text-brand-400 dark:hover:bg-brand-900/40">
+                                        <i class="fa-solid fa-eye text-sm" aria-hidden="true"></i>
                                     </a>
                                     <?php if($product->is_active): ?>
-                                        <a href="<?php echo e(route('inventory.edit', $product)); ?>" class="inline-flex items-center justify-center rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-neutral-800" title="Editar">
-                                            <i class="fa-solid fa-pen text-xs"></i>
-                                        </a>
-                                        <form method="POST" action="<?php echo e(route('inventory.toggle', $product)); ?>" class="inline">
-                                            <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
-                                            <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-neutral-800" title="Desactivar"
-                                                onclick="return confirm('¿Desactivar este producto?')">
-                                                <i class="fa-solid fa-ban text-xs"></i>
-                                            </button>
-                                        </form>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('products_edit')): ?>
+                                            <a href="<?php echo e(route('inventory.edit', $product)); ?>" title="Editar" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40">
+                                                <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
+                                            </a>
+                                            <form method="POST" action="<?php echo e(route('inventory.toggle', $product)); ?>" class="inline"
+                                                data-swal-confirm="El producto quedará inactivo y no aparecerá en el punto de venta."
+                                                data-swal-confirm-title="¿Desactivar producto?"
+                                                data-swal-confirm-icon="question"
+                                                data-swal-confirm-button="Sí, desactivar">
+                                                <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
+                                                <button type="submit" title="Desactivar" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40">
+                                                    <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
                                     <?php else: ?>
-                                        <form method="POST" action="<?php echo e(route('inventory.toggle', $product)); ?>" class="inline">
-                                            <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
-                                            <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-neutral-800" title="Reactivar">
-                                                <i class="fa-solid fa-check text-xs"></i>
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="<?php echo e(route('inventory.destroy', $product)); ?>" class="inline">
-                                            <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
-                                            <button type="submit" class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-neutral-800" title="Eliminar"
-                                                onclick="return confirm('¿Eliminar este producto permanentemente?')">
-                                                <i class="fa-solid fa-trash text-xs"></i>
-                                            </button>
-                                        </form>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('products_edit')): ?>
+                                            <form method="POST" action="<?php echo e(route('inventory.toggle', $product)); ?>" class="inline">
+                                                <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
+                                                <button type="submit" title="Reactivar" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-green-600 transition-all hover:scale-110 hover:bg-green-100 hover:shadow-sm dark:text-green-400 dark:hover:bg-green-900/40">
+                                                    <i class="fa-solid fa-check text-sm" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('products_delete')): ?>
+                                            <form method="POST" action="<?php echo e(route('inventory.destroy', $product)); ?>" class="inline"
+                                                data-swal-confirm="Esta acción eliminará el producto de forma permanente."
+                                                data-swal-confirm-title="¿Eliminar producto?"
+                                                data-swal-confirm-icon="warning"
+                                                data-swal-confirm-button="Sí, eliminar"
+                                                data-swal-confirm-color="danger">
+                                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
+                                                <button type="submit" title="Eliminar" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40">
+                                                    <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -179,17 +235,54 @@
                 </tbody>
             </table>
         </div>
+
+        <?php echo $__env->make('partials.pagination', ['paginator' => $products], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('scripts'); ?>
     <script>
-        document.getElementById('inventory-search')?.addEventListener('input', function () {
-            const query = this.value.toLowerCase();
+        function filterInventory() {
+            const query = document.getElementById('inventory-search')?.value.toLowerCase() ?? '';
+            const category = document.getElementById('filter-category')?.value ?? '';
+            const stock = document.getElementById('filter-stock')?.value ?? '';
+            const status = document.getElementById('filter-status')?.value ?? '';
+
             document.querySelectorAll('#inventory-tbody tr[data-search]').forEach(function (row) {
-                row.style.display = row.dataset.search.includes(query) ? '' : 'none';
+                let show = true;
+
+                if (query && !row.dataset.search.includes(query)) {
+                    show = false;
+                }
+
+                if (show && category && row.dataset.category !== category) {
+                    show = false;
+                }
+
+                if (show && status && row.dataset.active !== status) {
+                    show = false;
+                }
+
+                if (show && stock) {
+                    const currentStock = parseInt(row.dataset.stock);
+                    const minStock = parseInt(row.dataset.minStock);
+                    if (stock === 'in' && !(currentStock > 0)) {
+                        show = false;
+                    } else if (stock === 'low' && !(currentStock > 0 && currentStock <= minStock)) {
+                        show = false;
+                    } else if (stock === 'out' && currentStock !== 0) {
+                        show = false;
+                    }
+                }
+
+                row.style.display = show ? '' : 'none';
             });
-        });
+        }
+
+        document.getElementById('inventory-search')?.addEventListener('input', filterInventory);
+        document.getElementById('filter-category')?.addEventListener('change', filterInventory);
+        document.getElementById('filter-stock')?.addEventListener('change', filterInventory);
+        document.getElementById('filter-status')?.addEventListener('change', filterInventory);
     </script>
 <?php $__env->stopSection(); ?>
 

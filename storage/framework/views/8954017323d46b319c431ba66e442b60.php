@@ -5,7 +5,7 @@
         $stats = [
             [
                 'label' => 'Roles definidos',
-                'value' => $roles->count(),
+                'value' => $roles->total(),
                 'sub' => 'Total en el sistema',
                 'path' => 'M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z',
             ],
@@ -54,32 +54,45 @@
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </section>
 
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative w-full sm:max-w-sm">
-            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input
-                type="search"
-                id="role-search"
-                placeholder="Buscar rol..."
-                autocomplete="off"
-                class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
-            />
+    <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="relative w-full sm:max-w-sm">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" class="stroke-current" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="role-search"
+                    placeholder="Buscar rol..."
+                    autocomplete="off"
+                    class="w-full rounded-xl border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500"
+                />
+            </div>
+
+            <select
+                id="role-filter-status"
+                aria-label="Filtrar por estado"
+                class="rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            >
+                <option value="">Todos los estados</option>
+                <option value="1">Activos</option>
+                <option value="0">Inactivos</option>
+            </select>
         </div>
 
-        <a
-            href="<?php echo e(route('roles.create')); ?>"
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
-        >
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Nuevo rol
-        </a>
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('roles_create')): ?>
+            <a
+                href="<?php echo e(route('roles.create')); ?>"
+                class="ml-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2"
+            >
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Nuevo rol
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-800" role="grid">
                 <thead class="bg-brand-50/60 dark:bg-neutral-800/60">
                 <tr class="text-left text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     <th class="px-4 py-3 sm:px-6">ID</th>
@@ -95,6 +108,7 @@
                 <?php $__empty_1 = true; $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr
                         data-role-row
+                        data-role-active="<?php echo e($role->is_active ? '1' : '0'); ?>"
                         data-role-search="<?php echo e(strtolower(trim($role->name . ' ' . ($role->description ?? '')))); ?>"
                         class="<?php echo e($role->is_active ? 'hover:bg-brand-50/40 dark:hover:bg-neutral-800/50' : 'bg-neutral-50 hover:bg-neutral-100/60 dark:bg-neutral-800/30 dark:hover:bg-neutral-800/60'); ?>"
                     >
@@ -104,6 +118,15 @@
                                 <?php echo e($role->name); ?>
 
                             </span>
+                            <?php if($role->is_super_admin): ?>
+                                <span class="ml-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/40 dark:text-violet-400">
+                                    Super
+                                </span>
+                            <?php endif; ?>
+                            <p class="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
+                                <?php echo e($role->permissions_count ?? 0); ?> <?php echo e(($role->permissions_count ?? 0) === 1 ? 'permiso' : 'permisos'); ?>
+
+                            </p>
                         </td>
                         <td class="hidden max-w-[200px] truncate px-4 py-3 text-sm text-neutral-500 dark:text-neutral-400 sm:px-6 md:table-cell">
                             <?php echo e($role->description ?? '—'); ?>
@@ -145,44 +168,59 @@
                                     </button>
                                 <?php endif; ?>
 
-                                <?php if(Route::has('roles.edit')): ?>
-                                    <a
-                                        href="<?php echo e(route('roles.edit', $role)); ?>"
-                                        title="Editar"
-                                        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
-                                    </a>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('roles_edit')): ?>
+                                    <?php if($role->is_active && Route::has('roles.permissions')): ?>
+                                        <button
+                                            type="button"
+                                            title="Permisos"
+                                            data-permissions-role="<?php echo e(route('roles.permissions', $role)); ?>"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-violet-600 transition-all hover:scale-110 hover:bg-violet-100 hover:shadow-sm dark:text-violet-400 dark:hover:bg-violet-900/40"
+                                        >
+                                            <i class="fa-solid fa-user-shield text-sm" aria-hidden="true"></i>
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if(Route::has('roles.edit')): ?>
+                                        <a
+                                            href="<?php echo e(route('roles.edit', $role)); ?>"
+                                            title="Editar"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-blue-600 transition-all hover:scale-110 hover:bg-blue-100 hover:shadow-sm dark:text-blue-400 dark:hover:bg-blue-900/40"
+                                        >
+                                            <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if($role->is_active && Route::has('roles.toggle')): ?>
+                                        <form method="POST" action="<?php echo e(route('roles.toggle', $role)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('PATCH'); ?>
+                                            <button
+                                                type="submit"
+                                                data-disable-role
+                                                title="Deshabilitar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
-                                <?php if($role->is_active && Route::has('roles.toggle')): ?>
-                                    <form method="POST" action="<?php echo e(route('roles.toggle', $role)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('PATCH'); ?>
-                                        <button
-                                            type="submit"
-                                            data-disable-role
-                                            title="Deshabilitar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition-all hover:scale-110 hover:bg-amber-100 hover:shadow-sm dark:text-amber-400 dark:hover:bg-amber-900/40"
-                                        >
-                                            <i class="fa-solid fa-ban text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-
-                                <?php if(! $role->is_active && Route::has('roles.destroy')): ?>
-                                    <form method="POST" action="<?php echo e(route('roles.destroy', $role)); ?>">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button
-                                            type="submit"
-                                            data-delete-role
-                                            title="Eliminar"
-                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
-                                        >
-                                            <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('roles_delete')): ?>
+                                    <?php if(! $role->is_active && Route::has('roles.destroy')): ?>
+                                        <form method="POST" action="<?php echo e(route('roles.destroy', $role)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
+                                            <button
+                                                type="submit"
+                                                data-delete-role
+                                                title="Eliminar"
+                                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-600 transition-all hover:scale-110 hover:bg-red-100 hover:shadow-sm dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -210,21 +248,24 @@
                 </tbody>
             </table>
         </div>
+
+        <?php echo $__env->make('partials.pagination', ['paginator' => $roles], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
     <div id="role-modal-container" aria-hidden="true"></div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('scripts'); ?>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('role-search');
+            const filterStatus = document.getElementById('role-filter-status');
             const rows = document.querySelectorAll('[data-role-row]');
             const noResultsRow = document.getElementById('no-results-row');
 
-            searchInput.addEventListener('input', () => {
+            const applyFilters = () => {
                 const term = searchInput.value.trim().toLowerCase();
+                const statusFilter = filterStatus.value;
                 let visible = 0;
 
                 if (rows.length === 0) {
@@ -233,7 +274,9 @@
                 }
 
                 rows.forEach((row) => {
-                    const show = row.dataset.roleSearch.includes(term);
+                    const matchesSearch = row.dataset.roleSearch.includes(term);
+                    const matchesStatus = !statusFilter || row.dataset.roleActive === statusFilter;
+                    const show = matchesSearch && matchesStatus;
                     row.classList.toggle('hidden', !show);
                     if (show) {
                         visible++;
@@ -241,7 +284,10 @@
                 });
 
                 noResultsRow.classList.toggle('hidden', visible > 0);
-            });
+            };
+
+            searchInput.addEventListener('input', applyFilters);
+            filterStatus?.addEventListener('change', applyFilters);
 
             document.querySelectorAll('[data-disable-role]').forEach((button) => {
                 button.addEventListener('click', (event) => {
@@ -255,7 +301,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Sí, deshabilitar',
                         cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#d97706',
+                        confirmButtonColor: window.SwalColors.brand,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
@@ -276,7 +322,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Sí, eliminar',
                         cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#dc2626',
+                        confirmButtonColor: window.SwalColors.danger,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
@@ -362,5 +408,4 @@
         });
     </script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Brian\PhpstormProjects\Glenda_Store\resources\views/modules/roles/index.blade.php ENDPATH**/ ?>

@@ -226,7 +226,7 @@ unset($__errorArgs, $__bag); ?>
                         class="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                     >
                         <?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($role->id); ?>" <?php if(old('role_id', $employee->role_id) == $role->id): echo 'selected'; endif; ?>>
+                            <option value="<?php echo e($role->id); ?>" <?php if(old('role_id', $employee->roles->first()?->id) == $role->id): echo 'selected'; endif; ?>>
                                 <?php echo e($roleLabels[$role->name] ?? $role->name); ?>
 
                             </option>
@@ -252,7 +252,7 @@ unset($__errorArgs, $__bag); ?>
                     </div>
                     <label class="relative inline-flex shrink-0 cursor-pointer items-center">
                         <input type="checkbox" name="is_active" value="1" <?php if(old('is_active', $employee->is_active)): echo 'checked'; endif; ?> class="peer sr-only" />
-                        <div class="peer relative h-6 w-11 rounded-full bg-neutral-300 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:bg-brand-600 peer-checked:after:translate-x-5 dark:bg-neutral-600"></div>
+                        <div class="peer relative h-6 w-11 rounded-full bg-neutral-300 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:bg-brand-600 peer-checked:after:translate-x-5 dark:bg-neutral-600 dark:peer-checked:bg-brand-600"></div>
                     </label>
                 </div>
 
